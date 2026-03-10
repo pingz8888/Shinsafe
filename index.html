@@ -142,48 +142,13 @@ const CORE_MAP = {
 const CONFIG = {
     days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     workouts: {
-        'Monday': { 
-            title: "Base Aerobic Run (3km)", main: "3km Run (6:00-6:30 pace).", attention: "High cadence, mid-foot strike.", coreKey: "A", 
-            details: "Core Routine A: Focus on isometric trunk stability and posterior chain engagement. Includes Forearm Planks, Dead Bugs, and Glute Bridges.",
-            desc: "Maintain a steady conversational pace. The goal is to build structural tolerance in your shins.",
-            protip: "Aim for a cadence of 170+ steps per minute. Short, quick steps keep your feet under your center of gravity."
-        },
-        'Tuesday': { 
-            title: "Steady Cycling (40m)", main: "40m (80-90 RPM). Zone 2.", attention: "Focus on upward pedal 'pull'.", coreKey: "C", 
-            details: "Core Routine C: Targets deep abdominal wall reinforcement and spinal extension balance. Includes Hollow Holds, Russian Twists, and Superman Holds.",
-            desc: "Low-impact active recovery. Keep resistance moderate but cadence high to flush metabolic waste.",
-            protip: "Focus on the 'up-pull' of the pedal stroke, not just pushing down."
-        },
-        'Wednesday': { 
-            title: "Speed Intervals (4x400m)", main: "4x400m at 5:15 pace. 90s walk rest.", attention: "Do not jog during rest.", coreKey: "B", 
-            details: "Core Routine B: Emphasizes lateral stability and anti-rotation control. Includes Side Planks, Bicycle Crunches, and Bird Dogs.",
-            desc: "High-intensity biomechanical test. Run each 400m strong and controlled.",
-            protip: "Lean forward slightly from the ankles, not the waist."
-        },
-        'Thursday': { 
-            title: "Elliptical Resistance", main: "35 Minutes moderate resistance.", attention: "Heels glued to pedals.", coreKey: "C", 
-            details: "Core Routine C: Deep abdominal wall reinforcement to prevent anterior pelvic tilt during fatigue. Includes Hollow Holds and Superman Holds.",
-            desc: "Zero-impact endurance session that mimics the running motion.",
-            protip: "Keep your heels glued to the pedals. Lifting your heels shifts stress onto the shins."
-        },
-        'Friday': { 
-            title: "Endurance Progression", main: "4km total. Final 1km build to 5:45.", attention: "Stay light on feet.", coreKey: "A", 
-            details: "Core Routine A: Reinforcing pelvic levelness and glute activation for the long haul. Includes Dead Bugs and Glute Bridges.",
-            desc: "Start slow at a 6:15 pace, then gradually 'turn up the dial' to finish strong.",
-            protip: "If you feel any sharp 'pinging' in your shins, immediately shorten your stride."
-        },
-        'Saturday': { 
-            title: "Active Recovery", main: "45m brisk walk or 30m mobility/Yoga.", attention: "Zero intensity focus.", coreKey: "None", 
-            details: "Ankle Circles & Cat-Cow: Purely restorative movement to increase blood flow and joint lubrication without impact loading.",
-            desc: "Purely for blood flow. Keep the intensity absolutely zero. CNS reset day.",
-            protip: "Focus on a natural, smooth heel-to-toe roll."
-        },
-        'Sunday': { 
-            title: "Full System Rest", main: "Rest Day. Zero Impact.", attention: "15m static stretch focusing on soleus.", coreKey: "None", 
-            details: "Full System Rest: Complete neurological and muscular downtime. Focus on static stretching to lengthen the soleus and calf complex.",
-            desc: "Complete rest. Your tissues repair themselves today. Do not skip this.",
-            protip: "Hydrate heavily and aim for 8+ hours of sleep."
-        }
+        'Monday': { title: "Base Aerobic Run (3km)", main: "3km Run (6:00-6:30 pace).", attention: "High cadence, mid-foot strike.", coreKey: "A", details: "Core Routine A", desc: "Build structural tolerance.", protip: "Aim for 170+ cadence." },
+        'Tuesday': { title: "Steady Cycling (40m)", main: "40m (80-90 RPM). Zone 2.", attention: "Upward pedal 'pull'.", coreKey: "C", details: "Core Routine C", desc: "Low-impact recovery.", protip: "Focus on the up-pull." },
+        'Wednesday': { title: "Speed Intervals (4x400m)", main: "4x400m at 5:15 pace. 90s walk rest.", attention: "Do not jog during rest.", coreKey: "B", details: "Core Routine B", desc: "Biomechanical test.", protip: "Lean from ankles." },
+        'Thursday': { title: "Elliptical Resistance", main: "35 Minutes moderate resistance.", attention: "Heels glued to pedals.", coreKey: "C", details: "Core Routine C", desc: "Mimics running motion.", protip: "Keep heels glued." },
+        'Friday': { title: "Endurance Progression", main: "4km total. Final 1km build to 5:45.", attention: "Stay light on feet.", coreKey: "A", details: "Core Routine A", desc: "Turn up the dial.", protip: "Shorten stride if tired." },
+        'Saturday': { title: "Active Recovery", main: "45m brisk walk or 30m mobility/Yoga.", attention: "Zero intensity focus.", coreKey: "None", details: "Ankle Circles & Cat-Cow", desc: "CNS reset day.", protip: "Breathe deep." },
+        'Sunday': { title: "Full System Rest", main: "Rest Day. Zero Impact.", attention: "15m static stretch focusing on soleus.", coreKey: "None", details: "Full System Rest", desc: "Tissue repair.", protip: "Sleep 8+ hours." }
     },
     warmup: [
         { n: "Ankle Circles", d: 60, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Lift one foot and slowly rotate your ankle in big, wide circles." },
