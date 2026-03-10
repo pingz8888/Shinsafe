@@ -4,72 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Shin-Safe v10.0</title>
+    <title>Shin-Safe v10.1</title>
     <style>
         :root { --bg: #000; --card: #1c1c1e; --accent: #0a84ff; --highlight: #32d74b; --victory: #ffd700; --text: #fff; --dim: #8e8e93; --border: #2c2c2e; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 16px 40px; -webkit-user-select: none; }
         
-        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .settings-icon { font-size: 20px; cursor: pointer; padding: 10px; }
-        .settings-panel { display: none; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 15px; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
-        
-        .week-strip { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        /* Navigation & Success State */
+        .week-strip { display: flex; justify-content: space-between; margin: 10px 0 20px; }
         .day { display: flex; flex-direction: column; align-items: center; width: 40px; font-size: 10px; color: var(--dim); cursor: pointer; }
         .circle { width: 30px; height: 30px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; margin-top: 6px; font-weight: 600; color: #fff; position: relative; }
         .active .circle { background: var(--accent); }
         .day.done .circle { background: var(--highlight); border: 2px solid var(--victory); }
         .day.done .circle::after { content: '✓'; position: absolute; font-size: 10px; bottom: -5px; right: -5px; background: var(--victory); color: #000; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; }
 
+        /* Tactical Briefing (v9.2 Restored) */
         .briefing-card { background: linear-gradient(145deg, rgba(10, 132, 255, 0.2), rgba(0,0,0,0)); border: 1px solid var(--accent); border-radius: 20px; padding: 20px; margin-bottom: 16px; }
         .briefing-card h3 { margin: 0 0 10px; color: var(--accent); font-size: 1.2rem; }
         .briefing-detail { font-size: 0.85rem; margin-bottom: 12px; color: #d1d1d6; line-height: 1.5; }
         .briefing-detail strong { color: var(--highlight); display: block; margin-bottom: 2px; text-transform: uppercase; font-size: 0.75rem; }
+
+        /* Victory Banner (v9.3) */
         .victory-banner { background: linear-gradient(135deg, #1e1e1e 0%, #000 100%); border: 2px solid var(--victory); border-radius: 24px; padding: 30px 20px; text-align: center; margin-bottom: 20px; animation: glow 2s infinite alternate; }
         @keyframes glow { from { box-shadow: 0 0 5px var(--victory); } to { box-shadow: 0 0 20px var(--victory); } }
         .victory-text { font-size: 2rem; font-weight: 800; background: linear-gradient(to right, #fff, var(--victory)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
 
+        /* Sections */
         .section { background: var(--card); border-radius: 24px; padding: 20px; margin-bottom: 12px; border: 1px solid var(--border); }
         .section-header h2 { margin: 0; font-size: 1.1rem; text-transform: uppercase; color: var(--dim); }
         .active-section { border-color: var(--accent); }
         .content { margin-top: 15px; display: none; }
         .expanded { display: block; }
+        .locked { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
+
+        /* Timer UI */
         .ex-img-frame { width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; background: #000; border-radius: 16px; margin-bottom: 12px; border: 1px solid #3a3a3c; overflow: hidden; }
         .ex-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .clock { font-size: 4.5rem; font-weight: 200; font-variant-numeric: tabular-nums; line-height: 1; color: var(--accent); letter-spacing: -2px; margin: 5px 0; text-align: center;}
         .progress-bar { width: 100%; height: 4px; background: #2c2c2e; border-radius: 2px; margin: 10px 0; overflow: hidden; }
         .fill { height: 100%; background: var(--highlight); transition: width 0.3s ease; }
 
-        button { padding: 16px; border-radius: 14px; border: none; font-weight: 700; font-size: 16px; background: #2c2c2e; color: #fff; width: 100%; }
+        button { padding: 16px; border-radius: 14px; border: none; font-weight: 700; font-size: 16px; background: #2c2c2e; color: #fff; width: 100%; cursor: pointer; }
         .btn-main { background: var(--accent); }
         .btn-success { background: var(--highlight); color: #000; }
         .next-btn { font-size: 0.8rem; color: var(--dim); text-transform: uppercase; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #3a3a3c; text-align: center; }
-        
-        /* Switch UI */
-        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3a3a3c; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        .restart-link { display: block; text-align: center; margin-top: 12px; font-size: 11px; color: var(--dim); text-decoration: underline; }
     </style>
 </head>
 <body>
-
-<div class="app-header">
-    <span style="font-weight: 800; font-size: 0.8rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px;">Shin-Safe v10.0</span>
-    <div class="settings-icon" onclick="APP.toggleSettings()">⚙️</div>
-</div>
-
-<div id="settings-panel" class="settings-panel">
-    <div class="setting-item">
-        <span>Metronome Ticks</span>
-        <label class="switch">
-            <input type="checkbox" id="metronome-toggle" checked>
-            <span class="slider"></span>
-        </label>
-    </div>
-</div>
 
 <div class="week-strip" id="strip"></div>
 
@@ -77,7 +58,12 @@
     <div id="victory-container" style="display:none;">
         <div class="victory-banner"><h1 class="victory-text">YOU ARE AWESOME!</h1></div>
     </div>
-    <div id="today-briefing" class="briefing-card" style="display:none;"><div id="briefing-content"></div></div>
+
+    <div id="today-briefing" class="briefing-card" style="display:none;">
+        <h3>Tactical Briefing</h3>
+        <div id="briefing-content"></div>
+    </div>
+
     <div id="sec-warmup" class="section">
         <div class="section-header"><h2>1. Warm-Up</h2></div>
         <div id="warmup-init-btn" class="content expanded"><button class="btn-main" onclick="APP.initPhase('warmup')">Begin Warm-Up</button></div>
@@ -88,8 +74,10 @@
             <div class="progress-bar"><div id="warmup-fill" class="fill"></div></div>
             <div class="next-btn" onclick="APP.skip()">Next Up: <span id="warmup-next" style="color:#fff;"></span></div>
             <button id="warmup-action" class="btn-main" onclick="APP.toggleTimer()">Pause</button>
+            <a href="#" class="restart-link" onclick="APP.restartRoutine()">Restart Warm-Up</a>
         </div>
     </div>
+
     <div id="sec-main" class="section">
         <div class="section-header"><h2 id="main-header-text">2. Main Workout</h2></div>
         <div class="content expanded" id="content-main">
@@ -98,6 +86,7 @@
             <button class="btn-success" id="main-complete-btn" onclick="APP.completeMain()" style="margin-top:20px;">Log Workout & Cool Down</button>
         </div>
     </div>
+
     <div id="sec-cooldown" class="section">
         <div class="section-header"><h2>3. Cool-Down</h2></div>
         <div id="cooldown-init-btn" class="content"><button class="btn-main" onclick="APP.initPhase('cooldown')">Begin Cool-Down</button></div>
@@ -108,6 +97,7 @@
             <div class="progress-bar"><div id="cooldown-fill" class="fill"></div></div>
             <div class="next-btn" onclick="APP.skip()">Next Up: <span id="cooldown-next" style="color:#fff;"></span></div>
             <button id="cooldown-action" class="btn-main" onclick="APP.toggleTimer()">Pause</button>
+            <a href="#" class="restart-link" onclick="APP.restartRoutine()">Restart Cool-Down</a>
         </div>
     </div>
 </div>
@@ -116,13 +106,13 @@
 const CONFIG = {
     days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     workouts: {
-        'Monday': { title: "Base Aerobic Run (3km)", main: "3km Run (6:00-6:30 pace).", attention: "Mid-foot strike. Silent landings.", details: "Core Routine A" },
-        'Tuesday': { title: "Steady Cycling (40m)", main: "40m (80-90 RPM). Zone 2.", attention: "Upward pedal pull focus.", details: "Core Routine C" },
-        'Wednesday': { title: "Speed Intervals (4x400m)", main: "400m at 5:15. 90s walk rest.", attention: "Do not jog during rest.", details: "Core Routine B" },
-        'Thursday': { title: "Elliptical Resistance", main: "35m moderate resistance.", attention: "Heels glued to pedals.", details: "Core Routine C" },
-        'Friday': { title: "Endurance Progression", main: "4km. Final 1km build to 5:45.", attention: "Stay light on feet.", details: "Core Routine A" },
-        'Saturday': { title: "Active Recovery", main: "45m walk or 30m mobility.", attention: "Zero intensity focus.", details: "Ankle Circles & Cat-Cow" },
-        'Sunday': { title: "Full System Rest", main: "Rest Day. Zero impact.", attention: "15m static stretch.", details: "Calf & Hip holds" }
+        'Monday': { title: "Base Aerobic Run (3km)", main: "3km Run (6:00-6:30 pace).", attention: "High cadence, mid-foot strike.", details: "Core Routine A" },
+        'Tuesday': { title: "Steady Cycling (40m)", main: "40m (80-90 RPM). Zone 2.", attention: "Focus on upward pedal 'pull'.", details: "Core Routine C" },
+        'Wednesday': { title: "Speed Intervals (4x400m)", main: "4x400m at 5:15 pace. 90s walk rest.", attention: "Do not jog during rest.", details: "Core Routine B" },
+        'Thursday': { title: "Elliptical Resistance", main: "35 Minutes moderate resistance.", attention: "Heels glued to pedals.", details: "Core Routine C" },
+        'Friday': { title: "Endurance Progression", main: "4km total. Final 1km build to 5:45.", attention: "Stay light on feet.", details: "Core Routine A" },
+        'Saturday': { title: "Active Recovery", main: "45m brisk walk or 30m mobility/Yoga.", attention: "Zero intensity focus.", details: "Ankle Circles & Cat-Cow" },
+        'Sunday': { title: "Full System Rest", main: "Rest Day. Zero Impact.", attention: "15m static stretch focusing on soleus.", details: "Calf & Hip holds" }
     },
     warmup: [
         { n: "Ankle Circles", d: 60, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Circles now, thirty seconds each way. Lubricate those joints." },
@@ -134,7 +124,7 @@ const CONFIG = {
     cooldown: [
         { n: "Straight Calf Stretch", d: 120, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Heel down, lean in. Stretch your upper calf." },
         { n: "Bent Knee Stretch", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Heel down, bend the back knee. Key for shin health." },
-        { n: "Hip Flexor Stretch", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Tuck your pelvis and lean in. Open those hips." },
+        { n: "Hip Flexor Stretch", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Tuck pelvis and lean in. Open those hips up." },
         { n: "Seated Hamstring", d: 180, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Reach forward gently. Breathe into it." },
         { n: "Cobra Stretch", d: 120, i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Look up and stretch that core. Great work." }
     ]
@@ -143,7 +133,7 @@ const CONFIG = {
 const APP = {
     timer: null, mode: null, idx: 0, time: 0, sessionRem: 0, totalSess: 0,
     todayIdx: new Date().getDay(), currentDayIdx: new Date().getDay(),
-    isComplete: false, audioCtx: null, wakeLock: null,
+    isComplete: false, wakeLock: null,
 
     init() {
         this.renderWeek();
@@ -154,41 +144,12 @@ const APP = {
         });
     },
 
-    toggleSettings() {
-        const panel = document.getElementById('settings-panel');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-    },
-
     async requestWakeLock() {
         if (!('wakeLock' in navigator)) return;
         try { this.wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
     },
 
     releaseWakeLock() { if (this.wakeLock) { this.wakeLock.release(); this.wakeLock = null; } },
-
-    // REINFORCED METRONOME: Resumes context every single tick
-    playTick() {
-        if (!document.getElementById('metronome-toggle').checked) return;
-        
-        // Force context resume on EVERY tick for iOS Safari
-        if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
-
-        const now = this.audioCtx.currentTime;
-        const osc = this.audioCtx.createOscillator();
-        const gain = this.audioCtx.createGain();
-        
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1200, now);
-        gain.gain.setValueAtTime(0.2, now); // Volume bump
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-        
-        osc.connect(gain);
-        gain.connect(this.audioCtx.destination);
-        
-        osc.start(now);
-        osc.stop(now + 0.05);
-    },
 
     renderWeek() {
         const strip = document.getElementById('strip');
@@ -212,10 +173,7 @@ const APP = {
 
         if (isToday && this.isComplete) {
             document.getElementById('victory-container').style.display = 'block';
-            document.getElementById('sec-warmup').style.display = 'none';
-            document.getElementById('sec-main').style.display = 'none';
-            document.getElementById('sec-cooldown').style.display = 'none';
-            document.getElementById('today-briefing').style.display = 'none';
+            ['sec-warmup', 'sec-main', 'sec-cooldown', 'today-briefing'].forEach(id => document.getElementById(id).style.display = 'none');
             return;
         }
 
@@ -224,16 +182,14 @@ const APP = {
         document.getElementById('briefing-content').innerHTML = `
             <div class="briefing-detail"><strong>Main Session</strong>${data.main}</div>
             <div class="briefing-detail"><strong>Biomechanical Focus</strong>${data.attention}</div>
-            <div class="briefing-detail"><strong>Core Protocol</strong>${data.details}</div>
-        `;
+            <div class="briefing-detail"><strong>Core Protocol</strong>${data.details}</div>`;
 
         document.getElementById('main-header-text').innerText = isToday ? "2. Main Workout" : "Exercise Details";
         document.getElementById('main-title').innerText = data.title;
-        document.getElementById('main-detailed-info').innerHTML = `<p style="font-size:0.9rem; color:var(--accent); font-weight:bold;">${data.main}</p><p style="font-size:0.85rem; color:var(--dim); line-height:1.4; margin-top:8px;">${data.details}</p>`;
+        document.getElementById('main-detailed-info').innerHTML = `<p style="font-size:0.9rem; color:var(--accent); font-weight:bold;">${data.main}</p><p style="font-size:0.85rem; color:var(--dim); margin-top:8px;">${data.details}</p>`;
         document.getElementById('main-complete-btn').style.display = isToday ? 'block' : 'none';
 
-        document.getElementById('sec-warmup').style.display = isToday ? 'block' : 'none';
-        document.getElementById('sec-cooldown').style.display = isToday ? 'block' : 'none';
+        ['sec-warmup', 'sec-main', 'sec-cooldown'].forEach(id => document.getElementById(id).style.display = isToday ? 'block' : (id === 'sec-main' ? 'block' : 'none'));
         
         if (isToday) {
             document.getElementById('sec-warmup').className = 'section active-section';
@@ -247,8 +203,6 @@ const APP = {
 
     initPhase(type) {
         this.requestWakeLock();
-        if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        this.audioCtx.resume();
         document.getElementById('strip').style.pointerEvents = 'none';
         document.getElementById('strip').style.opacity = '0.4';
         document.getElementById('today-briefing').style.display = 'none';
@@ -260,12 +214,11 @@ const APP = {
         document.getElementById(`${type}-init-btn`).style.display = 'none';
         document.getElementById(`content-${type}`).style.display = 'block';
         this.updateUI();
-        this.speak(`Ready! First up is ${set[0].n}. ${set[0].c}`);
+        this.speak(`Ready! First is ${set[0].n}. ${set[0].c}`);
         this.timer = setInterval(() => this.tick(), 1000);
     },
 
     tick() {
-        this.playTick(); // Metronome Priority
         this.time--; this.sessionRem--;
         if (this.time === 5) this.speak("Five seconds left.");
         if (this.time < 0) {
@@ -299,7 +252,7 @@ const APP = {
         document.getElementById('sec-main').style.display = 'none';
         document.getElementById('sec-cooldown').className = 'section active-section';
         document.getElementById('cooldown-init-btn').style.display = 'block';
-        this.speak("Workout logged.");
+        this.speak("Workout logged. Time for cool-down.");
     },
 
     updateUI() {
@@ -313,21 +266,20 @@ const APP = {
     },
 
     toggleTimer() {
-        if (this.timer) { clearInterval(this.timer); this.timer = null; this.speak("Paused."); this.releaseWakeLock(); }
-        else { 
-            if (this.audioCtx) this.audioCtx.resume();
-            this.requestWakeLock(); 
-            this.timer = setInterval(() => this.tick(), 1000); 
-            this.speak("Resuming."); 
+        if (this.timer) { 
+            clearInterval(this.timer); this.timer = null; this.speak("Paused."); this.releaseWakeLock(); 
+        } else { 
+            this.requestWakeLock(); this.timer = setInterval(() => this.tick(), 1000); this.speak("Resuming."); 
         }
     },
 
     speak(t) {
         window.speechSynthesis.cancel();
         const ut = new SpeechSynthesisUtterance(t);
-        const voices = window.speechSynthesis.getVoices();
-        ut.voice = voices.find(v => v.lang === 'en-SG' && v.name.includes('Mei-Jia')) || voices.find(v => v.name.includes('Samantha')) || voices[0];
-        ut.pitch = 1.25; ut.rate = 1.1;
+        const v = window.speechSynthesis.getVoices().find(v => v.lang === 'en-SG' && v.name.includes('Mei-Jia')) || 
+                  window.speechSynthesis.getVoices().find(v => v.name.includes('Samantha')) || 
+                  window.speechSynthesis.getVoices()[0];
+        ut.voice = v; ut.pitch = 1.25; ut.rate = 1.1;
         window.speechSynthesis.speak(ut);
     },
 
@@ -337,7 +289,9 @@ const APP = {
         if (this.idx >= CONFIG[this.mode].length) { this.finishPhase(); return; }
         this.time = CONFIG[this.mode][this.idx].d;
         this.updateUI();
-    }
+    },
+
+    restartRoutine() { this.initPhase(this.mode); }
 };
 
 window.onload = () => APP.init();
