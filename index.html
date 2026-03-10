@@ -221,7 +221,7 @@ const CONFIG = {
 const APP = {
     timer: null, mode: null, idx: 0, time: 0, sessionRem: 0, totalSess: 0,
     todayIdx: new Date().getDay(), currentDayIdx: new Date().getDay(),
-    completedDays: [], wakeLock: null,
+    isComplete: false, wakeLock: null, completedDays: [],
 
     init() {
         this.initPersistence();
@@ -235,20 +235,21 @@ const APP = {
 
     getWeekID() {
         const today = new Date();
-        const diff = today.getDate() - today.getDay();
-        const lastSun = new Date(today.setDate(diff));
-        lastSun.setHours(0,0,0,0);
-        return lastSun.getTime();
+        const day = today.getDay(); // Sunday is 0
+        const diff = today.getDate() - day;
+        const lastSunday = new Date(today.setDate(diff));
+        lastSunday.setHours(0,0,0,0);
+        return lastSunday.getTime();
     },
 
     initPersistence() {
-        const currentID = this.getWeekID();
-        const storedID = localStorage.getItem('ss_weekId');
-        if (storedID != currentID) {
-            localStorage.setItem('ss_weekId', currentID);
-            localStorage.setItem('ss_done', JSON.stringify([]));
+        const currentWeek = this.getWeekID();
+        const storedWeek = localStorage.getItem('shinSafe_weekId');
+        if (storedWeek != currentWeek) {
+            localStorage.setItem('shinSafe_weekId', currentWeek);
+            localStorage.setItem('shinSafe_completedDays', JSON.stringify([]));
         }
-        this.completedDays = JSON.parse(localStorage.getItem('ss_done') || "[]");
+        this.completedDays = JSON.parse(localStorage.getItem('shinSafe_completedDays') || "[]");
     },
 
     async requestWakeLock() {
@@ -259,12 +260,15 @@ const APP = {
     releaseWakeLock() { if (this.wakeLock) { this.wakeLock.release(); this.wakeLock = null; } },
 
     formatTime(seconds) {
-        const m = Math.floor(seconds / 60); const s = seconds % 60;
-        return `${m}:${s < 10 ? '0' : ''}${s}`;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     },
 
-    getDayKey(idx) {
-        return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][idx];
+    getDayKey(index) {
+        const d = CONFIG.days[index];
+        const map = {'Sun':'Sunday','Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday'};
+        return map[d];
     },
 
     getSet() {
@@ -278,7 +282,7 @@ const APP = {
     renderWeek() {
         const strip = document.getElementById('strip');
         strip.innerHTML = '';
-        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((d, i) => {
+        CONFIG.days.forEach((d, i) => {
             const isDone = this.completedDays.includes(i);
             const el = document.createElement('div');
             el.className = `day ${i === this.currentDayIdx ? 'active' : ''} ${isDone ? 'done' : ''}`;
@@ -294,20 +298,8 @@ const APP = {
         const dayKey = this.getDayKey(i);
         const data = CONFIG.workouts[dayKey];
         const isCompleted = this.completedDays.includes(i);
-        const isToday = (i === this.todayIdx);
 
-        // UI Gatekeeper: If completed, show ONLY Victory Banner
-        if (isCompleted) {
-            document.getElementById('victory-container').style.display = 'block';
-            document.getElementById('today-briefing').style.display = 'none';
-            ['sec-warmup', 'sec-main', 'sec-core', 'sec-cooldown'].forEach(id => {
-                const el = document.getElementById(id); if (el) el.style.display = 'none';
-            });
-            return;
-        }
-
-        // Standard Layout
-        document.getElementById('victory-container').style.display = 'none';
+        document.getElementById('victory-container').style.display = isCompleted ? 'block' : 'none';
         document.getElementById('today-briefing').style.display = 'block';
         
         document.getElementById('briefing-content').innerHTML = `
@@ -324,10 +316,14 @@ const APP = {
         const coreList = document.getElementById('core-list');
         coreList.innerHTML = '';
         CORE_MAP[data.coreKey].forEach(ex => {
-            const li = document.createElement('li'); li.innerText = ex; coreList.appendChild(li);
+            const li = document.createElement('li');
+            li.innerText = ex;
+            coreList.appendChild(li);
         });
 
-        document.getElementById('main-complete-btn').style.display = isToday ? 'block' : 'none';
+        // Toggle Buttons Visibility
+        const isToday = (i === this.todayIdx);
+        document.getElementById('main-complete-btn').style.display = (isToday && !isCompleted) ? 'block' : 'none';
 
         ['sec-warmup', 'sec-main', 'sec-core', 'sec-cooldown'].forEach(id => {
             const el = document.getElementById(id);
@@ -340,6 +336,23 @@ const APP = {
             document.getElementById('content-main').style.display = 'none';
             document.getElementById('sec-core').className = 'section';
             document.getElementById('sec-cooldown').className = 'section';
+            
+            // Lock UI if completed
+            if (isCompleted) {
+                document.getElementById('warmup-init-btn').classList.add('hidden');
+                document.getElementById('warmup-restart').classList.add('hidden');
+                document.getElementById('core-init-btn').classList.add('hidden');
+                document.getElementById('core-restart').classList.add('hidden');
+                document.getElementById('cooldown-init-btn').classList.add('hidden');
+                document.getElementById('cooldown-restart').classList.add('hidden');
+            } else {
+                document.getElementById('warmup-init-btn').classList.remove('hidden');
+                document.getElementById('warmup-restart').classList.remove('hidden');
+                document.getElementById('core-init-btn').classList.remove('hidden');
+                document.getElementById('core-restart').classList.remove('hidden');
+                document.getElementById('cooldown-init-btn').classList.remove('hidden');
+                document.getElementById('cooldown-restart').classList.remove('hidden');
+            }
             if (data.coreKey === 'None') document.getElementById('sec-core').style.display = 'none';
         } else {
             document.getElementById('sec-main').className = 'section active-section';
@@ -353,12 +366,16 @@ const APP = {
         document.getElementById('strip').style.opacity = '0.4';
         document.getElementById('today-briefing').style.display = 'none';
         this.mode = type;
+        
         const set = this.getSet();
         this.idx = 0;
+        
         document.getElementById(`${type}-init-btn`).style.display = 'none';
         document.getElementById(`content-${type}`).style.display = 'block';
+        
         if (type === 'core') {
-            this.updateCoreUI(); this.speak(`Ready! First is ${set[0].n}. ${set[0].c}`);
+            this.updateCoreUI();
+            this.speak(`Ready! First is ${set[0].n}. ${set[0].c}`);
         } else {
             this.time = set[0].d;
             this.totalSess = set.reduce((a, b) => a + b.d, 0);
@@ -373,8 +390,10 @@ const APP = {
         this.time--; this.sessionRem--;
         const set = this.getSet();
         const curSet = set[this.idx];
-        if (this.time === Math.floor(curSet.d / 2)) this.speak(`Halfway through ${curSet.n}.`);
+        
+        if (this.time === Math.floor(curSet.d / 2)) this.speak(`Halfway through ${curSet.n}. Keep it up.`);
         if (this.time === 5) this.speak("Switching in five seconds.");
+        
         if (this.time < 0) {
             this.idx++;
             if (this.idx >= set.length) { this.finishPhase(); return; }
@@ -388,7 +407,9 @@ const APP = {
         const set = this.getSet();
         this.idx++;
         if (this.idx >= set.length) { 
-            document.getElementById('core-fill').style.width = '100%'; this.finishPhase(); return; 
+            document.getElementById('core-fill').style.width = '100%';
+            this.finishPhase(); 
+            return; 
         }
         this.speak(`Next is ${set[this.idx].n}. ${set[this.idx].c}`);
         this.updateCoreUI();
@@ -401,34 +422,41 @@ const APP = {
         document.getElementById(`core-pic`).src = cur.i;
         document.getElementById(`core-reps`).innerText = cur.r;
         document.getElementById(`core-fill`).style.width = ((this.idx / set.length) * 100) + '%';
+        
         const btn = document.getElementById('core-action');
         if (this.idx === set.length - 1) {
-            btn.innerText = "Finish Core Routine"; btn.className = "btn-success";
+            btn.innerText = "Finish Core Routine";
+            btn.className = "btn-success";
         } else {
-            btn.innerText = "Next Exercise"; btn.className = "btn-main";
+            btn.innerText = "Next Exercise";
+            btn.className = "btn-main";
         }
     },
 
     finishPhase() {
         const oldMode = this.mode;
         if (this.timer) { clearInterval(this.timer); this.timer = null; }
+        
         if (oldMode === 'warmup') {
-            this.releaseWakeLock(); document.getElementById('sec-warmup').style.display = 'none';
+            this.releaseWakeLock();
+            document.getElementById('sec-warmup').style.display = 'none';
             document.getElementById('sec-main').className = 'section active-section';
             document.getElementById('content-main').style.display = 'block';
             this.speak("Warm-up complete.");
         } else if (oldMode === 'core') {
-            this.releaseWakeLock(); document.getElementById('sec-core').style.display = 'none';
+            this.releaseWakeLock();
+            document.getElementById('sec-core').style.display = 'none';
             document.getElementById('sec-cooldown').className = 'section active-section';
             document.getElementById('cooldown-init-btn').style.display = 'block';
             this.speak("Core routine complete. Let's move to the cool-down.");
         } else {
-            // Completion Persistence
+            // Persistence Logging
             if (!this.completedDays.includes(this.todayIdx)) {
                 this.completedDays.push(this.todayIdx);
-                localStorage.setItem('ss_done', JSON.stringify(this.completedDays));
+                localStorage.setItem('shinSafe_completedDays', JSON.stringify(this.completedDays));
             }
-            this.releaseWakeLock(); this.showDay(this.todayIdx);
+            this.releaseWakeLock();
+            this.showDay(this.todayIdx);
             document.getElementById('strip').style.pointerEvents = 'auto';
             document.getElementById('strip').style.opacity = '1';
             this.speak("Recovery complete. You are awesome!");
@@ -450,7 +478,8 @@ const APP = {
     },
 
     updateUI() {
-        const set = this.getSet(); const cur = set[this.idx];
+        const set = this.getSet();
+        const cur = set[this.idx];
         document.getElementById(`${this.mode}-name`).innerText = cur.n;
         document.getElementById(`${this.mode}-pic`).src = cur.i;
         document.getElementById(`${this.mode}-clock`).innerText = (this.time < 10 ? '0' : '') + this.time;
@@ -468,7 +497,8 @@ const APP = {
     },
 
     speak(t) {
-        window.speechSynthesis.cancel(); const ut = new SpeechSynthesisUtterance(t);
+        window.speechSynthesis.cancel();
+        const ut = new SpeechSynthesisUtterance(t);
         const v = window.speechSynthesis.getVoices().find(v => v.lang === 'en-SG' && v.name.includes('Mei-Jia')) || 
                   window.speechSynthesis.getVoices().find(v => v.name.includes('Samantha')) || 
                   window.speechSynthesis.getVoices()[0];
@@ -477,9 +507,13 @@ const APP = {
     },
 
     skip() {
-        this.sessionRem -= this.time; this.idx++; const set = this.getSet();
+        this.sessionRem -= this.time;
+        this.idx++;
+        const set = this.getSet();
         if (this.idx >= set.length) { this.finishPhase(); return; }
-        this.time = set[this.idx].d; this.speak(`Skipping to ${set[this.idx].n}.`); this.updateUI();
+        this.time = set[this.idx].d;
+        this.speak(`Skipping to ${set[this.idx].n}. ${set[this.idx].c}`);
+        this.updateUI();
     },
 
     restartRoutine() { this.initPhase(this.mode); }
