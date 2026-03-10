@@ -4,18 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Shin-Safe v9.9</title>
+    <title>Shin-Safe v10.0</title>
     <style>
         :root { --bg: #000; --card: #1c1c1e; --accent: #0a84ff; --highlight: #32d74b; --victory: #ffd700; --text: #fff; --dim: #8e8e93; --border: #2c2c2e; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 16px 60px; -webkit-user-select: none; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 16px 40px; -webkit-user-select: none; }
         
-        /* Header & Settings */
         .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .settings-icon { font-size: 20px; cursor: pointer; padding: 10px; }
         .settings-panel { display: none; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 15px; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
         
-        /* Week Strip */
         .week-strip { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .day { display: flex; flex-direction: column; align-items: center; width: 40px; font-size: 10px; color: var(--dim); cursor: pointer; }
         .circle { width: 30px; height: 30px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; margin-top: 6px; font-weight: 600; color: #fff; position: relative; }
@@ -23,7 +21,6 @@
         .day.done .circle { background: var(--highlight); border: 2px solid var(--victory); }
         .day.done .circle::after { content: '✓'; position: absolute; font-size: 10px; bottom: -5px; right: -5px; background: var(--victory); color: #000; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; }
 
-        /* Tactical Briefing & Victory */
         .briefing-card { background: linear-gradient(145deg, rgba(10, 132, 255, 0.2), rgba(0,0,0,0)); border: 1px solid var(--accent); border-radius: 20px; padding: 20px; margin-bottom: 16px; }
         .briefing-card h3 { margin: 0 0 10px; color: var(--accent); font-size: 1.2rem; }
         .briefing-detail { font-size: 0.85rem; margin-bottom: 12px; color: #d1d1d6; line-height: 1.5; }
@@ -32,7 +29,6 @@
         @keyframes glow { from { box-shadow: 0 0 5px var(--victory); } to { box-shadow: 0 0 20px var(--victory); } }
         .victory-text { font-size: 2rem; font-weight: 800; background: linear-gradient(to right, #fff, var(--victory)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
 
-        /* Sections & Timer */
         .section { background: var(--card); border-radius: 24px; padding: 20px; margin-bottom: 12px; border: 1px solid var(--border); }
         .section-header h2 { margin: 0; font-size: 1.1rem; text-transform: uppercase; color: var(--dim); }
         .active-section { border-color: var(--accent); }
@@ -61,7 +57,7 @@
 <body>
 
 <div class="app-header">
-    <span style="font-weight: 800; font-size: 0.8rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px;">Shin-Safe Pro</span>
+    <span style="font-weight: 800; font-size: 0.8rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px;">Shin-Safe v10.0</span>
     <div class="settings-icon" onclick="APP.toggleSettings()">⚙️</div>
 </div>
 
@@ -79,17 +75,9 @@
 
 <div id="app-container">
     <div id="victory-container" style="display:none;">
-        <div class="victory-banner">
-            <h1 class="victory-text">YOU ARE AWESOME!</h1>
-            <p class="victory-sub">Recovery complete. Your shins thank you.</p>
-        </div>
+        <div class="victory-banner"><h1 class="victory-text">YOU ARE AWESOME!</h1></div>
     </div>
-
-    <div id="today-briefing" class="briefing-card" style="display:none;">
-        <h3>Tactical Briefing</h3>
-        <div id="briefing-content"></div>
-    </div>
-
+    <div id="today-briefing" class="briefing-card" style="display:none;"><div id="briefing-content"></div></div>
     <div id="sec-warmup" class="section">
         <div class="section-header"><h2>1. Warm-Up</h2></div>
         <div id="warmup-init-btn" class="content expanded"><button class="btn-main" onclick="APP.initPhase('warmup')">Begin Warm-Up</button></div>
@@ -98,11 +86,10 @@
             <p id="warmup-name" style="text-align:center; font-weight:bold; color:var(--highlight);"></p>
             <div class="clock" id="warmup-clock">00</div>
             <div class="progress-bar"><div id="warmup-fill" class="fill"></div></div>
-            <div class="next-btn" onclick="APP.skip()">Next: <span id="warmup-next" style="color:#fff;"></span></div>
+            <div class="next-btn" onclick="APP.skip()">Next Up: <span id="warmup-next" style="color:#fff;"></span></div>
             <button id="warmup-action" class="btn-main" onclick="APP.toggleTimer()">Pause</button>
         </div>
     </div>
-
     <div id="sec-main" class="section">
         <div class="section-header"><h2 id="main-header-text">2. Main Workout</h2></div>
         <div class="content expanded" id="content-main">
@@ -111,7 +98,6 @@
             <button class="btn-success" id="main-complete-btn" onclick="APP.completeMain()" style="margin-top:20px;">Log Workout & Cool Down</button>
         </div>
     </div>
-
     <div id="sec-cooldown" class="section">
         <div class="section-header"><h2>3. Cool-Down</h2></div>
         <div id="cooldown-init-btn" class="content"><button class="btn-main" onclick="APP.initPhase('cooldown')">Begin Cool-Down</button></div>
@@ -120,7 +106,7 @@
             <p id="cooldown-name" style="text-align:center; font-weight:bold; color:var(--highlight);"></p>
             <div class="clock" id="cooldown-clock">00</div>
             <div class="progress-bar"><div id="cooldown-fill" class="fill"></div></div>
-            <div class="next-btn" onclick="APP.skip()">Next: <span id="cooldown-next" style="color:#fff;"></span></div>
+            <div class="next-btn" onclick="APP.skip()">Next Up: <span id="cooldown-next" style="color:#fff;"></span></div>
             <button id="cooldown-action" class="btn-main" onclick="APP.toggleTimer()">Pause</button>
         </div>
     </div>
@@ -139,18 +125,18 @@ const CONFIG = {
         'Sunday': { title: "Full System Rest", main: "Rest Day. Zero impact.", attention: "15m static stretch.", details: "Calf & Hip holds" }
     },
     warmup: [
-        { n: "Ankle Circles", d: 60, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Circles now, thirty seconds each way." },
-        { n: "Heel Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Toes up! Sharply up. Strengthen shins." },
-        { n: "Toe Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "High on your toes. Keep it light." },
-        { n: "Leg Swings", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Swing it out. Loosen those hips." },
-        { n: "High Knee March", d: 180, i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Drive those knees high!" }
+        { n: "Ankle Circles", d: 60, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Circles now, thirty seconds each way. Lubricate those joints." },
+        { n: "Heel Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Toes up! Sharply up. Strengthen the front of your shins." },
+        { n: "Toe Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "High on your toes. Keep your steps light and bouncy." },
+        { n: "Leg Swings", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Swing it out. Loosen up those hips." },
+        { n: "High Knee March", d: 180, i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Drive those knees high! Keep your core tight." }
     ],
     cooldown: [
-        { n: "Straight Calf Stretch", d: 120, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Heel down. Stretch upper calf." },
-        { n: "Bent Knee Stretch", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Heel down, bend back knee. Essential!" },
-        { n: "Hip Flexor Stretch", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Tuck pelvis and lean in." },
-        { n: "Seated Hamstring", d: 180, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Reach forward. Breathe deeply." },
-        { n: "Cobra Stretch", d: 120, i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Look up and stretch that core." }
+        { n: "Straight Calf Stretch", d: 120, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Heel down, lean in. Stretch your upper calf." },
+        { n: "Bent Knee Stretch", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Heel down, bend the back knee. Key for shin health." },
+        { n: "Hip Flexor Stretch", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Tuck your pelvis and lean in. Open those hips." },
+        { n: "Seated Hamstring", d: 180, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Reach forward gently. Breathe into it." },
+        { n: "Cobra Stretch", d: 120, i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Look up and stretch that core. Great work." }
     ]
 };
 
@@ -180,17 +166,28 @@ const APP = {
 
     releaseWakeLock() { if (this.wakeLock) { this.wakeLock.release(); this.wakeLock = null; } },
 
+    // REINFORCED METRONOME: Resumes context every single tick
     playTick() {
         if (!document.getElementById('metronome-toggle').checked) return;
+        
+        // Force context resume on EVERY tick for iOS Safari
         if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+
+        const now = this.audioCtx.currentTime;
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
-        osc.connect(gain); gain.connect(this.audioCtx.destination);
-        osc.frequency.setValueAtTime(1200, this.audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, this.audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, this.audioCtx.currentTime + 0.04);
-        osc.start(); osc.stop(this.audioCtx.currentTime + 0.04);
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, now);
+        gain.gain.setValueAtTime(0.2, now); // Volume bump
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.05);
     },
 
     renderWeek() {
@@ -268,14 +265,14 @@ const APP = {
     },
 
     tick() {
-        this.playTick();
+        this.playTick(); // Metronome Priority
         this.time--; this.sessionRem--;
         if (this.time === 5) this.speak("Five seconds left.");
         if (this.time < 0) {
             this.idx++;
             if (this.idx >= CONFIG[this.mode].length) { this.finishPhase(); return; }
             this.time = CONFIG[this.mode][this.idx].d;
-            this.speak(`Next up: ${CONFIG[this.mode][this.idx].n}. ${CONFIG[this.mode][this.idx].c}`);
+            this.speak(`Next is ${CONFIG[this.mode][this.idx].n}. ${CONFIG[this.mode][this.idx].c}`);
         }
         this.updateUI();
     },
@@ -317,7 +314,12 @@ const APP = {
 
     toggleTimer() {
         if (this.timer) { clearInterval(this.timer); this.timer = null; this.speak("Paused."); this.releaseWakeLock(); }
-        else { this.requestWakeLock(); this.timer = setInterval(() => this.tick(), 1000); this.speak("Resuming."); }
+        else { 
+            if (this.audioCtx) this.audioCtx.resume();
+            this.requestWakeLock(); 
+            this.timer = setInterval(() => this.tick(), 1000); 
+            this.speak("Resuming."); 
+        }
     },
 
     speak(t) {
