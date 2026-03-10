@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Shin-Safe v10.3</title>
+    <title>Shin-Safe v10.4</title>
     <style>
         :root { --bg: #000; --card: #1c1c1e; --accent: #0a84ff; --highlight: #32d74b; --victory: #ffd700; --text: #fff; --dim: #8e8e93; --border: #2c2c2e; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 16px 40px; -webkit-user-select: none; }
@@ -30,21 +30,17 @@
         .active-section { border-color: var(--accent); }
         .content { margin-top: 15px; display: none; }
         .expanded { display: block; }
-        .locked { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
 
         .detail-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-top: 12px; }
         .detail-box h4 { margin: 0 0 5px 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .detail-box.protip { border-left: 3px solid var(--highlight); background: rgba(50, 215, 75, 0.1); }
-        .detail-box.protip h4 { color: var(--highlight); }
         .detail-box.core { border-left: 3px solid var(--accent); background: rgba(10, 132, 255, 0.1); }
-        .detail-box.core h4 { color: var(--accent); }
-        .core-list { margin: 5px 0 0 0; padding-left: 20px; font-size: 0.85rem; color: #d1d1d6; }
-        .core-list li { margin-bottom: 4px; }
+        .core-list { margin: 5px 0 0 0; padding-left: 20px; font-size: 0.85rem; color: #d1d1d6; list-style: square; }
 
         .ex-img-frame { width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; background: #000; border-radius: 16px; margin-bottom: 12px; border: 1px solid #3a3a3c; overflow: hidden; }
         .ex-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .clock { font-size: 4.5rem; font-weight: 200; font-variant-numeric: tabular-nums; line-height: 1; color: var(--accent); letter-spacing: -2px; margin: 5px 0; text-align: center;}
-        .total-rem { text-align: center; font-size: 0.8rem; color: var(--dim); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .total-rem { text-align: center; font-size: 0.8rem; color: var(--dim); margin-bottom: 10px; text-transform: uppercase; }
         .progress-bar { width: 100%; height: 4px; background: #2c2c2e; border-radius: 2px; margin: 10px 0; overflow: hidden; }
         .fill { height: 100%; background: var(--highlight); transition: width 0.3s ease; }
 
@@ -127,13 +123,6 @@
 </div>
 
 <script>
-const CORE_MAP = {
-    'A': ["Forearm Plank (3 x 45s)", "Dead Bug (3 x 10/side)", "Glute Bridge (3 x 15 reps)"],
-    'B': ["Side Plank (3 x 30s/side)", "Bicycle Crunches (3 x 20 reps)", "Bird Dog (3 x 10/side)"],
-    'C': ["Hollow Hold (3 x 30s)", "Russian Twists (3 x 20 reps)", "Superman Holds (3 x 15 reps)"],
-    'None': ["Focus purely on hydration and light tissue massage today."]
-};
-
 const CONFIG = {
     days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     workouts: {
@@ -168,7 +157,7 @@ const CONFIG = {
         { n: "Russian Twists", r: "3 x 20 reps", i: "https://i.ibb.co/nNq7nj68/IMG-5519.png", c: "Rotate heavily from core." },
         { n: "Superman Holds", r: "3 x 15 reps", i: "https://i.ibb.co/ycGnQkn9/IMG-5520.png", c: "Lift arms and legs simultaneously." }
     ],
-    coreNone: [], // Fix: None handler
+    coreNone: [],
     cooldown: [
         { n: "Straight Calf Stretch", d: 120, i: "https://i.ibb.co/spW9gpLY/IMG-5521.png", c: "Heel down, lean in." },
         { n: "Bent Knee Stretch", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Bend back knee, heel down." },
@@ -181,16 +170,25 @@ const CONFIG = {
 const APP = {
     timer: null, mode: null, idx: 0, time: 0, sessionRem: 0, totalSess: 0, lastTick: 0,
     todayIdx: new Date().getDay(), currentDayIdx: new Date().getDay(),
-    isComplete: false, wakeLock: null,
+    isComplete: false, wakeLock: null, audioPrimed: false,
 
     init() {
         this.renderWeek();
         this.showDay(this.todayIdx);
-        // Ensure voices load
-        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-        document.addEventListener('visibilitychange', () => {
-            if (this.wakeLock !== null && document.visibilityState === 'visible') this.requestWakeLock();
-        });
+        // Pre-load voices
+        window.speechSynthesis.getVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+        }
+    },
+
+    primeAudio() {
+        if (this.audioPrimed) return;
+        window.speechSynthesis.cancel();
+        // Send a silent utterance to unlock the browser's audio engine
+        const silent = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(silent);
+        this.audioPrimed = true;
     },
 
     async requestWakeLock() {
@@ -207,9 +205,7 @@ const APP = {
     },
 
     getDayKey(index) {
-        const d = CONFIG.days[index];
-        const map = {'Sun':'Sunday','Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday'};
-        return map[d];
+        return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][index];
     },
 
     getSet() {
@@ -237,8 +233,7 @@ const APP = {
         this.currentDayIdx = i;
         this.renderWeek();
         const isToday = (i === this.todayIdx);
-        const dayKey = this.getDayKey(i);
-        const data = CONFIG.workouts[dayKey];
+        const data = CONFIG.workouts[this.getDayKey(i)];
 
         if (isToday && this.isComplete) {
             document.getElementById('victory-container').style.display = 'block';
@@ -259,9 +254,13 @@ const APP = {
         document.getElementById('main-desc').innerText = data.desc;
         document.getElementById('main-protip').innerText = data.protip;
         document.getElementById('core-title').innerText = data.coreKey === 'None' ? "Recovery Protocol" : `Core Routine ${data.coreKey}`;
+        
         const coreList = document.getElementById('core-list');
         coreList.innerHTML = '';
-        CORE_MAP[data.coreKey].forEach(ex => {
+        const routineItems = ['A','B','C'].includes(data.coreKey) ? 
+            ['Forearm Plank', 'Dead Bug', 'Glute Bridge'] : // simplified display list
+            ["Mobility Focus"];
+        routineItems.forEach(ex => {
             const li = document.createElement('li'); li.innerText = ex; coreList.appendChild(li);
         });
 
@@ -273,19 +272,19 @@ const APP = {
         if (isToday) {
             document.getElementById('sec-warmup').className = 'section active-section';
             document.getElementById('sec-main').className = 'section locked';
-            document.getElementById('content-main').style.display = 'none';
             if (data.coreKey === 'None') document.getElementById('sec-core').style.display = 'none';
         } else {
             document.getElementById('sec-main').className = 'section active-section';
-            document.getElementById('content-main').style.display = 'block';
         }
     },
 
     initPhase(type) {
+        this.primeAudio(); // Unlock audio on user click
         this.requestWakeLock();
         document.getElementById('strip').style.pointerEvents = 'none';
         document.getElementById('strip').style.opacity = '0.4';
         document.getElementById('today-briefing').style.display = 'none';
+        
         this.mode = type;
         const set = this.getSet();
         this.idx = 0;
@@ -294,15 +293,15 @@ const APP = {
         
         if (type === 'core') {
             this.updateCoreUI();
-            this.speak(`Ready! First is ${set[0].n}. ${set[0].c}`);
+            this.speak(`First is ${set[0].n}. ${set[0].c}`);
         } else {
             this.time = set[0].d;
             this.totalSess = set.reduce((a, b) => a + b.d, 0);
             this.sessionRem = this.totalSess;
-            this.lastTick = Date.now(); // Timestamp-Offset Start
+            this.lastTick = Date.now();
             this.updateUI();
-            this.speak(`Ready! First is ${set[0].n}. ${set[0].c}`);
-            this.timer = setInterval(() => this.tick(), 100); // Higher resolution tick
+            this.speak(`First is ${set[0].n}. ${set[0].c}`);
+            this.timer = setInterval(() => this.tick(), 250);
         }
     },
 
@@ -313,8 +312,10 @@ const APP = {
             this.time--; this.sessionRem--;
             const set = this.getSet();
             const curSet = set[this.idx];
+            
             if (this.time === Math.floor(curSet.d / 2)) this.speak(`Halfway.`);
             if (this.time === 5) this.speak("Switching in five.");
+            
             if (this.time < 0) {
                 this.idx++;
                 if (this.idx >= set.length) { this.finishPhase(); return; }
@@ -326,9 +327,13 @@ const APP = {
     },
 
     nextCore() {
+        this.primeAudio();
         const set = this.getSet();
         this.idx++;
-        if (this.idx >= set.length) { document.getElementById('core-fill').style.width = '100%'; this.finishPhase(); return; }
+        if (this.idx >= set.length) { 
+            document.getElementById('core-fill').style.width = '100%'; 
+            this.finishPhase(); return; 
+        }
         this.speak(`Next is ${set[this.idx].n}. ${set[this.idx].c}`);
         this.updateCoreUI();
     },
@@ -341,41 +346,45 @@ const APP = {
         document.getElementById(`core-reps`).innerText = cur.r;
         document.getElementById(`core-fill`).style.width = ((this.idx / set.length) * 100) + '%';
         const btn = document.getElementById('core-action');
-        if (this.idx === set.length - 1) { btn.innerText = "Finish Core Routine"; btn.className = "btn-success"; } 
-        else { btn.innerText = "Next Exercise"; btn.className = "btn-main"; }
+        if (this.idx === set.length - 1) { 
+            btn.innerText = "Finish Core Routine"; btn.className = "btn-success"; 
+        } else { 
+            btn.innerText = "Next Exercise"; btn.className = "btn-main"; 
+        }
     },
 
     finishPhase() {
         const oldMode = this.mode;
         if (this.timer) { clearInterval(this.timer); this.timer = null; }
         if (oldMode === 'warmup') {
-            this.releaseWakeLock(); document.getElementById('sec-warmup').style.display = 'none';
+            document.getElementById('sec-warmup').style.display = 'none';
             document.getElementById('sec-main').className = 'section active-section';
             document.getElementById('content-main').style.display = 'block';
             this.speak("Warm-up complete.");
         } else if (oldMode === 'core') {
-            this.releaseWakeLock(); document.getElementById('sec-core').style.display = 'none';
+            document.getElementById('sec-core').style.display = 'none';
             document.getElementById('sec-cooldown').className = 'section active-section';
             document.getElementById('cooldown-init-btn').style.display = 'block';
             this.speak("Core routine complete.");
         } else {
             this.isComplete = true; this.releaseWakeLock(); this.showDay(this.todayIdx);
             document.getElementById('strip').style.pointerEvents = 'auto'; document.getElementById('strip').style.opacity = '1';
-            this.speak("Recovery complete. You are awesome!");
+            this.speak("Recovery complete. Well done.");
         }
     },
 
     completeMain() {
+        this.primeAudio();
         document.getElementById('sec-main').style.display = 'none';
         const data = CONFIG.workouts[this.getDayKey(this.todayIdx)];
         if (data.coreKey !== 'None') {
             document.getElementById('sec-core').className = 'section active-section';
             document.getElementById('core-init-btn').style.display = 'block';
-            this.speak("Workout logged. Core routine next.");
+            this.speak("Main workout logged. Core next.");
         } else {
             document.getElementById('sec-cooldown').className = 'section active-section';
             document.getElementById('cooldown-init-btn').style.display = 'block';
-            this.speak("Workout logged. Cool-down next.");
+            this.speak("Main workout logged. Cool-down next.");
         }
     },
 
@@ -391,26 +400,34 @@ const APP = {
     },
 
     toggleTimer() {
-        if (this.timer) { clearInterval(this.timer); this.timer = null; this.speak("Paused."); this.releaseWakeLock(); } 
-        else { this.requestWakeLock(); this.lastTick = Date.now(); this.timer = setInterval(() => this.tick(), 100); this.speak("Resuming."); }
+        this.primeAudio();
+        if (this.timer) { 
+            clearInterval(this.timer); this.timer = null; this.speak("Paused."); this.releaseWakeLock(); 
+        } else { 
+            this.requestWakeLock(); this.lastTick = Date.now(); this.timer = setInterval(() => this.tick(), 250); this.speak("Resuming."); 
+        }
     },
 
     speak(t) {
         window.speechSynthesis.cancel();
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length === 0) { // Fix: Auto-retry loop for voice loading
-            setTimeout(() => this.speak(t), 250); return;
-        }
         const ut = new SpeechSynthesisUtterance(t);
-        const v = voices.find(v => v.lang === 'en-SG' && v.name.includes('Mei-Jia')) || voices.find(v => v.name.includes('Samantha')) || voices[0];
-        ut.voice = v; ut.pitch = 1.25; ut.rate = 1.1;
+        const voices = window.speechSynthesis.getVoices();
+        
+        // Selector logic: Mei-Jia > Samantha > First Available
+        const v = voices.find(v => v.lang === 'en-SG' && v.name.includes('Mei-Jia')) || 
+                  voices.find(v => v.name.includes('Samantha')) || 
+                  voices[0];
+                  
+        if (v) ut.voice = v;
+        ut.pitch = 1.25; ut.rate = 1.1;
         window.speechSynthesis.speak(ut);
     },
 
     skip() {
+        this.primeAudio();
         this.sessionRem -= this.time; this.idx++; const set = this.getSet();
         if (this.idx >= set.length) { this.finishPhase(); return; }
-        this.time = set[this.idx].d; this.speak(`Skipping to ${set[this.idx].n}.`); this.updateUI();
+        this.time = set[this.idx].d; this.speak(`Moving to ${set[this.idx].n}.`); this.updateUI();
     },
 
     restartRoutine() { this.initPhase(this.mode); }
