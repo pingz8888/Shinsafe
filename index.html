@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Shin-Safe v11.5</title>
+    <title>Shin-Safe v10.2</title>
     <style>
-        :root { --bg: #000; --card: #1c1c1e; --accent: #0a84ff; --highlight: #32d74b; --victory: #ffd700; --text: #fff; --dim: #8e8e93; --border: #2c2c2e; --warning: #ffb340; }
+        :root { --bg: #000; --card: #1c1c1e; --accent: #0a84ff; --highlight: #32d74b; --victory: #ffd700; --text: #fff; --dim: #8e8e93; --border: #2c2c2e; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 16px 40px; -webkit-user-select: none; }
         
-        /* Persistent Log Strip */
+        /* Navigation & Success State */
         .week-strip { display: flex; justify-content: space-between; margin: 10px 0 20px; }
         .day { display: flex; flex-direction: column; align-items: center; width: 40px; font-size: 10px; color: var(--dim); cursor: pointer; }
         .circle { width: 30px; height: 30px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; margin-top: 6px; font-weight: 600; color: #fff; position: relative; }
@@ -17,23 +17,48 @@
         .day.done .circle { background: var(--highlight); border: 2px solid var(--victory); }
         .day.done .circle::after { content: '✓'; position: absolute; font-size: 10px; bottom: -5px; right: -5px; background: var(--victory); color: #000; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; }
 
-        /* Main Exercise Card Refined (v11.5) */
-        .section { background: var(--card); border-radius: 24px; padding: 22px; margin-bottom: 12px; border: 1px solid var(--border); transition: all 0.3s ease; }
-        .section-header h2 { margin: 0; font-size: 1rem; text-transform: uppercase; color: var(--dim); letter-spacing: 1px; }
-        .main-title { font-size: 1.5rem; font-weight: 800; color: var(--accent); margin: 12px 0 5px; }
-        
-        .tip-box { background: rgba(255, 179, 64, 0.1); border-left: 3px solid var(--warning); padding: 12px; margin-top: 15px; border-radius: 8px; }
-        .tip-box h4 { margin: 0 0 5px; color: var(--warning); font-size: 0.8rem; text-transform: uppercase; }
-        .tip-list { margin: 0; padding: 0; list-style: none; font-size: 0.85rem; color: #d1d1d6; line-height: 1.5; }
-        .tip-list li { margin-bottom: 8px; padding-left: 18px; position: relative; }
-        .tip-list li::before { content: '→'; position: absolute; left: 0; color: var(--highlight); }
+        /* Tactical Briefing */
+        .briefing-card { background: linear-gradient(145deg, rgba(10, 132, 255, 0.2), rgba(0,0,0,0)); border: 1px solid var(--accent); border-radius: 20px; padding: 20px; margin-bottom: 16px; }
+        .briefing-card h3 { margin: 0 0 10px; color: var(--accent); font-size: 1.2rem; }
+        .briefing-detail { font-size: 0.85rem; margin-bottom: 12px; color: #d1d1d6; line-height: 1.5; }
+        .briefing-detail strong { color: var(--highlight); display: block; margin-bottom: 2px; text-transform: uppercase; font-size: 0.75rem; }
 
-        .btn-success { background: var(--highlight); color: #000; padding: 18px; border-radius: 16px; border: none; font-weight: 800; width: 100%; margin-top: 20px; font-size: 1rem; }
-        
-        /* Timer UI elements */
-        .clock { font-size: 4.5rem; font-weight: 200; font-variant-numeric: tabular-nums; line-height: 1; color: var(--accent); text-align: center; margin: 10px 0; }
+        /* Victory Banner */
+        .victory-banner { background: linear-gradient(135deg, #1e1e1e 0%, #000 100%); border: 2px solid var(--victory); border-radius: 24px; padding: 30px 20px; text-align: center; margin-bottom: 20px; animation: glow 2s infinite alternate; }
+        @keyframes glow { from { box-shadow: 0 0 5px var(--victory); } to { box-shadow: 0 0 20px var(--victory); } }
+        .victory-text { font-size: 2rem; font-weight: 800; background: linear-gradient(to right, #fff, var(--victory)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+
+        /* Sections */
+        .section { background: var(--card); border-radius: 24px; padding: 20px; margin-bottom: 12px; border: 1px solid var(--border); }
+        .section-header h2 { margin: 0; font-size: 1.1rem; text-transform: uppercase; color: var(--dim); }
+        .active-section { border-color: var(--accent); }
+        .content { margin-top: 15px; display: none; }
+        .expanded { display: block; }
+        .locked { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
+
+        /* Detail Boxes for Main Workout */
+        .detail-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-top: 12px; }
+        .detail-box h4 { margin: 0 0 5px 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-box.protip { border-left: 3px solid var(--highlight); background: rgba(50, 215, 75, 0.1); }
+        .detail-box.protip h4 { color: var(--highlight); }
+        .detail-box.core { border-left: 3px solid var(--accent); background: rgba(10, 132, 255, 0.1); }
+        .detail-box.core h4 { color: var(--accent); }
+        .core-list { margin: 5px 0 0 0; padding-left: 20px; font-size: 0.85rem; color: #d1d1d6; }
+        .core-list li { margin-bottom: 4px; }
+
+        /* Timer UI */
+        .ex-img-frame { width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; background: #000; border-radius: 16px; margin-bottom: 12px; border: 1px solid #3a3a3c; overflow: hidden; }
+        .ex-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .clock { font-size: 4.5rem; font-weight: 200; font-variant-numeric: tabular-nums; line-height: 1; color: var(--accent); letter-spacing: -2px; margin: 5px 0; text-align: center;}
+        .total-rem { text-align: center; font-size: 0.8rem; color: var(--dim); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .progress-bar { width: 100%; height: 4px; background: #2c2c2e; border-radius: 2px; margin: 10px 0; overflow: hidden; }
         .fill { height: 100%; background: var(--highlight); transition: width 0.3s ease; }
+
+        button { padding: 16px; border-radius: 14px; border: none; font-weight: 700; font-size: 16px; background: #2c2c2e; color: #fff; width: 100%; cursor: pointer; }
+        .btn-main { background: var(--accent); margin-bottom: 8px;}
+        .btn-success { background: var(--highlight); color: #000; }
+        .next-btn { font-size: 0.8rem; color: var(--dim); text-transform: uppercase; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #3a3a3c; text-align: center; }
+        .restart-link { display: block; text-align: center; margin-top: 12px; font-size: 11px; color: var(--dim); text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -41,238 +66,421 @@
 <div class="week-strip" id="strip"></div>
 
 <div id="app-container">
-    <div id="victory-container" style="display:none; text-align:center;">
-        <h1 style="color:var(--victory); font-size: 2.5rem;">SUCCESS!</h1>
-        <p>Your 11.5 Elite Session is Logged.</p>
+    <div id="victory-container" style="display:none;">
+        <div class="victory-banner"><h1 class="victory-text">YOU ARE AWESOME!</h1></div>
+    </div>
+
+    <div id="today-briefing" class="briefing-card" style="display:none;">
+        <h3>Tactical Briefing</h3>
+        <div id="briefing-content"></div>
     </div>
 
     <div id="sec-warmup" class="section">
-        <div class="section-header"><h2>1. Warm-Up Protocol</h2></div>
-        <div id="warmup-init-btn" class="content expanded"><button style="background:var(--accent); color:white; padding:15px; width:100%; border-radius:12px; border:none; font-weight:bold;" onclick="APP.initPhase('warmup')">Start Guided Warm-Up</button></div>
-        <div class="content" id="content-warmup" style="display:none;">
+        <div class="section-header"><h2>1. Warm-Up</h2></div>
+        <div id="warmup-init-btn" class="content expanded"><button class="btn-main" onclick="APP.initPhase('warmup')">Begin Warm-Up</button></div>
+        <div class="content" id="content-warmup">
+            <div class="ex-img-frame"><img id="warmup-pic" src="" class="ex-img"></div>
             <p id="warmup-name" style="text-align:center; font-weight:bold; color:var(--highlight);"></p>
             <div class="clock" id="warmup-clock">00</div>
+            <div class="total-rem">Phase Remaining: <span id="warmup-total-rem">0:00</span></div>
             <div class="progress-bar"><div id="warmup-fill" class="fill"></div></div>
-            <button style="background:var(--border); color:white; padding:10px; width:100%; border-radius:10px; border:none;" onclick="APP.toggleTimer()">Pause/Play</button>
+            <div class="next-btn" onclick="APP.skip()">Next Up: <span id="warmup-next" style="color:#fff;"></span></div>
+            <button id="warmup-action" class="btn-main" onclick="APP.toggleTimer()">Pause</button>
+            <a href="#" class="restart-link" onclick="APP.restartRoutine()">Restart Warm-Up</a>
         </div>
     </div>
 
     <div id="sec-main" class="section">
-        <div class="section-header"><h2>2. Main Tactical Session</h2></div>
+        <div class="section-header"><h2 id="main-header-text">2. Main Workout</h2></div>
         <div class="content expanded" id="content-main">
-            <div class="main-title" id="main-title"></div>
-            <p id="main-summary" style="font-size:0.95rem; color:#fff; margin-bottom:15px;"></p>
-            
-            <div class="tip-box">
-                <h4>Pro Tips & Form Check</h4>
-                <ul class="tip-list" id="tip-list"></ul>
+            <h3 id="main-title" style="margin:0; color:var(--accent);"></h3>
+            <p id="main-desc" style="font-size:0.9rem; color:#fff; line-height:1.4; margin-top:8px;"></p>
+            <div class="detail-box protip">
+                <h4>Pro Tip</h4>
+                <div id="main-protip" style="font-size:0.85rem; color:#d1d1d6;"></div>
             </div>
-
-            <button class="btn-success" id="main-complete-btn" onclick="APP.completeMain()">Log Activity & Cool Down</button>
+            <div class="detail-box core">
+                <h4 id="core-title"></h4>
+                <ul id="core-list" class="core-list"></ul>
+            </div>
+            <button class="btn-success" id="main-complete-btn" onclick="APP.completeMain()" style="margin-top:20px;">Log Workout & Proceed</button>
         </div>
     </div>
 
-    <div id="sec-cooldown" class="section" style="display:none;">
-        <div class="section-header"><h2>3. Recovery Protocol</h2></div>
-        <div id="cooldown-init-btn" class="content expanded"><button style="background:var(--accent); color:white; padding:15px; width:100%; border-radius:12px; border:none; font-weight:bold;" onclick="APP.initPhase('cooldown')">Start Guided Cool-Down</button></div>
-        <div class="content" id="content-cooldown" style="display:none;">
+    <div id="sec-core" class="section" style="display:none;">
+        <div class="section-header"><h2>3. Core Protocol</h2></div>
+        <div id="core-init-btn" class="content"><button class="btn-main" onclick="APP.initPhase('core')">Begin Core Routine</button></div>
+        <div class="content" id="content-core">
+            <div class="ex-img-frame"><img id="core-pic" src="" class="ex-img"></div>
+            <p id="core-name" style="text-align:center; font-weight:bold; color:var(--highlight);"></p>
+            <div class="clock" id="core-reps" style="font-size:2.5rem; margin:15px 0;">3 x 45s</div>
+            <div class="total-rem">Manual Pace: Focus on perfect form</div>
+            <div class="progress-bar"><div id="core-fill" class="fill" style="width:0%"></div></div>
+            <button id="core-action" class="btn-main" onclick="APP.nextCore()">Next Exercise</button>
+            <a href="#" class="restart-link" onclick="APP.restartRoutine()">Restart Core</a>
+        </div>
+    </div>
+
+    <div id="sec-cooldown" class="section">
+        <div class="section-header"><h2>4. Cool-Down</h2></div>
+        <div id="cooldown-init-btn" class="content"><button class="btn-main" onclick="APP.initPhase('cooldown')">Begin Cool-Down</button></div>
+        <div class="content" id="content-cooldown">
+            <div class="ex-img-frame"><img id="cooldown-pic" src="" class="ex-img"></div>
             <p id="cooldown-name" style="text-align:center; font-weight:bold; color:var(--highlight);"></p>
             <div class="clock" id="cooldown-clock">00</div>
+            <div class="total-rem">Phase Remaining: <span id="cooldown-total-rem">0:00</span></div>
             <div class="progress-bar"><div id="cooldown-fill" class="fill"></div></div>
+            <div class="next-btn" onclick="APP.skip()">Next Up: <span id="cooldown-next" style="color:#fff;"></span></div>
+            <button id="cooldown-action" class="btn-main" onclick="APP.toggleTimer()">Pause</button>
+            <a href="#" class="restart-link" onclick="APP.restartRoutine()">Restart Cool-Down</a>
         </div>
     </div>
 </div>
 
 <script>
+const CORE_MAP = {
+    'A': ["Forearm Plank (3 x 45s)", "Dead Bug (3 x 10/side)", "Glute Bridge (3 x 15 reps)"],
+    'B': ["Side Plank (3 x 30s/side)", "Bicycle Crunches (3 x 20 reps)", "Bird Dog (3 x 10/side)"],
+    'C': ["Hollow Hold (3 x 30s)", "Russian Twists (3 x 20 reps)", "Superman Holds (3 x 15 reps)"],
+    'None': ["Focus purely on hydration and light tissue massage today."]
+};
+
 const CONFIG = {
     days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     workouts: {
         'Monday': { 
-            title: "Base Aerobic Run", 
-            summary: "3km Run at 6:00-6:30 pace. Focus on building an aerobic base without shin strain.",
-            tips: [
-                "**Mid-Foot Strike:** Land directly under your center of gravity to avoid braking forces.",
-                "**Cadence Check:** Aim for 170-180 steps per minute. Short, quick steps reduce impact.",
-                "**Nasal Breathing:** Try to keep your mouth closed. It regulates intensity automatically."
-            ]
+            title: "Base Aerobic Run (3km)", main: "3km Run (6:00-6:30 pace).", attention: "High cadence, mid-foot strike.", coreKey: "A",
+            desc: "Maintain a steady conversational pace. The goal is to build structural tolerance in your shins through repetitive, low-intensity loading.",
+            protip: "Aim for a cadence of 170+ steps per minute. Short, quick steps keep your feet under your center of gravity, drastically reducing braking forces on the tibia."
         },
         'Tuesday': { 
-            title: "Steady Cycling", 
-            summary: "40 Minutes at 80-90 RPM. Low impact, high blood flow.",
-            tips: [
-                "**Circular Pedaling:** Focus on pulling the pedals *up* during the backstroke.",
-                "**Stable Pelvis:** If your hips are rocking, your seat is too high. Lower it 5mm.",
-                "**Core Stability:** Don't lean all your weight on the handlebars. Brace your abs."
-            ]
+            title: "Steady Cycling (40m)", main: "40m (80-90 RPM). Zone 2.", attention: "Focus on upward pedal 'pull'.", coreKey: "C",
+            desc: "Low-impact active recovery. Keep resistance moderate but cadence high to flush metabolic waste from the legs.",
+            protip: "Focus on the 'up-pull' of the pedal stroke, not just pushing down. This engages your hamstrings and ensures a balanced leg workout."
         },
         'Wednesday': { 
-            title: "Speed Intervals", 
-            summary: "4x400m at 5:15 pace. 90s walk rest. Testing anaerobic capacity.",
-            tips: [
-                "**Active Recovery:** Walk during the 90s rest. Do not stand still or sit down.",
-                "**Vertical Oscillation:** Don't bounce too high. Keep your energy moving forward.",
-                "**Relaxed Upper Body:** Keep your jaw and shoulders loose to save oxygen."
-            ]
+            title: "Speed Intervals (4x400m)", main: "4x400m at 5:15 pace. 90s walk rest.", attention: "Do not jog during rest.", coreKey: "B",
+            desc: "High-intensity biomechanical test. Run each 400m strong and controlled. Take the full 90 seconds to walk and recover.",
+            protip: "Lean forward slightly from the ankles, not the waist. Keep your jaw and shoulders relaxed to avoid tension traveling down to your gait."
         },
         'Thursday': { 
-            title: "Elliptical Resistance", 
-            summary: "35m Moderate Resistance. Targeted shin-sparing endurance.",
-            tips: [
-                "**Full Foot Contact:** Keep your heels glued to the pedals to engage the posterior chain.",
-                "**Hand Positioning:** Use the handles to make this a full-body effort.",
-                "**Reverse Motion:** Spend 5 mins pedaling backward to challenge different muscles."
-            ]
+            title: "Elliptical Resistance", main: "35 Minutes moderate resistance.", attention: "Heels glued to pedals.", coreKey: "C",
+            desc: "Zero-impact endurance session that mimics the running motion. Keep a steady, unbroken rhythm.",
+            protip: "Keep your heels glued to the pedals. Lifting your heels shifts stress onto the shins; flat feet keep the work in your glutes."
         },
         'Friday': { 
-            title: "Endurance Progression", 
-            summary: "4km total. Start slow, finish strong at 5:45/km.",
-            tips: [
-                "**Negative Splits:** Each kilometer should be 5-10 seconds faster than the last.",
-                "**Posture Check:** As fatigue hits, don't lean back. Keep a slight 'tall' forward lean.",
-                "**Shin Sensation:** If you feel 'tightness,' shorten your stride immediately."
-            ]
+            title: "Endurance Progression", main: "4km total. Final 1km build to 5:45.", attention: "Stay light on feet.", coreKey: "A",
+            desc: "Start slow at a 6:15 pace for the first 3km, then gradually 'turn up the dial' to finish the last kilometer strong.",
+            protip: "If you feel any sharp 'pinging' in your shins during the speed build, immediately shorten your stride and drop back to baseline pace."
         },
         'Saturday': { 
-            title: "Active Recovery", 
-            summary: "45m Brisk Walk. Flushing out toxins, zero impact stress.",
-            tips: [
-                "**Natural Gait:** Focus on a smooth roll from heel to toe.",
-                "**Arm Drive:** Swing your arms naturally to help rotate the torso.",
-                "**Mental Reset:** Use this as a 'phone-free' session to reset your nervous system."
-            ]
+            title: "Active Recovery", main: "45m brisk walk or 30m mobility/Yoga.", attention: "Zero intensity focus.", coreKey: "None",
+            desc: "Purely for blood flow. Keep the intensity absolutely zero. Enjoy the movement and let your central nervous system reset.",
+            protip: "Focus on a natural, smooth heel-to-toe roll. Let your arms swing loosely to help your torso rotate naturally."
         },
         'Sunday': { 
-            title: "Full System Rest", 
-            summary: "Zero impact. Today is for cellular repair.",
-            tips: [
-                "**Hydration Focus:** Drink 500ml more water than usual today.",
-                "**Static Soleus:** Spend 5 mins on your deep calf stretch while reading.",
-                "**Sleep Quality:** Aim for 8+ hours to maximize growth hormone release."
-            ]
+            title: "Full System Rest", main: "Rest Day. Zero Impact.", attention: "15m static stretch focusing on soleus.", coreKey: "None",
+            desc: "Complete rest. Your tissues, bones, and tendons repair themselves today. Do not skip this recovery window.",
+            protip: "Hydrate heavily (+500ml more than usual) and aim for 8+ hours of sleep to maximize growth hormone release for tissue repair."
         }
     },
     warmup: [
-        { n: "Ankle Circles", d: 60, c: "Rotate your feet slowly in large circles. 30s each way." },
-        { n: "Heel Walks", d: 120, c: "Toes up! Pull them sharply toward your shins. Strengthen that front armor." },
-        { n: "High Knee March", d: 180, c: "Drive knees high. Keep core tight. Prepare for impact." }
+        { n: "Ankle Circles", d: 60, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Lift one foot and slowly rotate your ankle in big, wide circles. Thirty seconds each way to lubricate those joints." },
+        { n: "Heel Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Rock back onto your heels. Keep your legs straight and pull your toes up as high as you can while you walk." },
+        { n: "Toe Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Push up high onto the balls of your feet. Keep your core tight and take light, quick steps forward." },
+        { n: "Leg Swings", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Use a wall for balance. Keep your leg straight and swing it smoothly forward and backward to loosen those hips." },
+        { n: "High Knee March", d: 180, i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Stand tall, brace your core, and drive your knees up to hip height one by one. Pump those arms!" }
+    ],
+    coreA: [
+        { n: "Forearm Plank", r: "3 x 45s", i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Forearm plank. Keep your back completely flat and brace your core tight." },
+        { n: "Dead Bug", r: "3 x 10/side", i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Dead bug. Lower your opposite arm and leg. Press your lower back hard into the floor." },
+        { n: "Glute Bridge", r: "3 x 15 reps", i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Glute bridge. Squeeze your glutes and push your hips up without over-arching your back." }
+    ],
+    coreB: [
+        { n: "Side Plank Left", r: "3 x 30s", i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Side plank on your left arm. Lift your hips high and hold steady." },
+        { n: "Side Plank Right", r: "3 x 30s", i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Switch sides. Side plank on your right arm. Keep your body in a perfectly straight line." },
+        { n: "Bicycle Crunches", r: "3 x 20 reps", i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Bicycle crunches. Twist from your core, bringing your elbow to the opposite knee." },
+        { n: "Bird Dog", r: "3 x 10/side", i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Bird dog. On all fours, extend opposite arm and leg. Keep your spine neutral." }
+    ],
+    coreC: [
+        { n: "Hollow Hold", r: "3 x 30s", i: "https://i.ibb.co/B5RMc6f9/IMG-5518.png", c: "Hollow hold. Legs and shoulders slightly off the ground. Lower back flat against the floor. Breathe!" },
+        { n: "Russian Twists", r: "3 x 20 reps", i: "https://i.ibb.co/nNq7nj68/IMG-5519.png", c: "Russian twists. Lean back slightly, keep your back straight, and rotate heavily from your core." },
+        { n: "Superman Holds", r: "3 x 15 reps", i: "https://i.ibb.co/ycGnQkn9/IMG-5520.png", c: "Superman holds. Lie on your stomach and lift your arms and legs. Squeeze the glutes and lower back." }
     ],
     cooldown: [
-        { n: "Bent Knee Stretch", d: 120, c: "Keep heel down, bend the back knee. Target that deep soleus." },
-        { n: "Cobra Stretch", d: 120, c: "Look up, stretch the core. Great session today." }
+        { n: "Straight Calf Stretch", d: 120, i: "https://i.ibb.co/spW9gpLY/IMG-5521.png", c: "Face a wall. Step one leg back, keep it perfectly straight, and press your back heel hard into the floor." },
+        { n: "Bent Knee Stretch", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "In that same stance, slightly bend your back knee but keep that heel glued to the floor. Great for your soleus." },
+        { n: "Hip Flexor Stretch", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Drop to one knee. Tuck your pelvis under, squeeze your glutes, and gently lean your weight forward." },
+        { n: "Seated Hamstring", d: 180, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Sit with one leg straight out. Keep your back flat and reach forward towards your toes without bouncing." },
+        { n: "Cobra Stretch", d: 120, i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Lie flat on your stomach, hands under your shoulders, and gently press your chest up while looking forward." }
     ]
 };
 
 const APP = {
-    timer: null, mode: null, idx: 0, time: 0, 
-    todayIdx: new Date().getDay(),
-    STORAGE_KEY: 'shinSafe_v11_logs',
+    timer: null, mode: null, idx: 0, time: 0, sessionRem: 0, totalSess: 0,
+    todayIdx: new Date().getDay(), currentDayIdx: new Date().getDay(),
+    isComplete: false, wakeLock: null,
 
     init() {
         this.renderWeek();
         this.showDay(this.todayIdx);
         window.speechSynthesis.getVoices();
+        document.addEventListener('visibilitychange', () => {
+            if (this.wakeLock !== null && document.visibilityState === 'visible') this.requestWakeLock();
+        });
     },
 
-    getLogs() { return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]'); },
-    
-    isDateLogged(idx) {
-        const d = new Date(); d.setDate(d.getDate() + (idx - d.getDay()));
-        return this.getLogs().includes(d.toDateString());
+    async requestWakeLock() {
+        if (!('wakeLock' in navigator)) return;
+        try { this.wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+    },
+
+    releaseWakeLock() { if (this.wakeLock) { this.wakeLock.release(); this.wakeLock = null; } },
+
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    },
+
+    getDayKey(index) {
+        return CONFIG.days[index] === 'Sun' ? 'Sunday' : CONFIG.days[index] === 'Mon' ? 'Monday' : CONFIG.days[index] === 'Tue' ? 'Tuesday' : CONFIG.days[index] === 'Wed' ? 'Wednesday' : CONFIG.days[index] === 'Thu' ? 'Thursday' : CONFIG.days[index] === 'Fri' ? 'Friday' : 'Saturday';
+    },
+
+    getSet() {
+        if (this.mode === 'core') {
+            const data = CONFIG.workouts[this.getDayKey(this.todayIdx)];
+            return CONFIG['core' + data.coreKey]; 
+        }
+        return CONFIG[this.mode];
     },
 
     renderWeek() {
-        const strip = document.getElementById('strip'); strip.innerHTML = '';
+        const strip = document.getElementById('strip');
+        strip.innerHTML = '';
         CONFIG.days.forEach((d, i) => {
-            const done = this.isDateLogged(i);
+            const isDone = (i === this.todayIdx && this.isComplete);
             const el = document.createElement('div');
-            el.className = `day ${i === this.todayIdx ? 'active' : ''} ${done ? 'done' : ''}`;
+            el.className = `day ${i === this.currentDayIdx ? 'active' : ''} ${isDone ? 'done' : ''}`;
+            el.onclick = () => this.showDay(i);
             el.innerHTML = `<span>${d}</span><div class="circle">${d[0]}</div>`;
             strip.appendChild(el);
         });
     },
 
-    showDay(idx) {
-        const dayKey = CONFIG.days[idx] === 'Sun' ? 'Sunday' : CONFIG.days[idx] === 'Mon' ? 'Monday' : CONFIG.days[idx] === 'Tue' ? 'Tuesday' : CONFIG.days[idx] === 'Wed' ? 'Wednesday' : CONFIG.days[idx] === 'Thu' ? 'Thursday' : CONFIG.days[idx] === 'Fri' ? 'Friday' : 'Saturday';
+    showDay(i) {
+        this.currentDayIdx = i;
+        this.renderWeek();
+        const isToday = (i === this.todayIdx);
+        const dayKey = this.getDayKey(i);
         const data = CONFIG.workouts[dayKey];
-        
-        if (this.isDateLogged(idx)) {
+
+        if (isToday && this.isComplete) {
             document.getElementById('victory-container').style.display = 'block';
-            document.getElementById('sec-main').style.display = 'none';
-            document.getElementById('sec-warmup').style.display = 'none';
+            ['sec-warmup', 'sec-main', 'sec-core', 'sec-cooldown', 'today-briefing'].forEach(id => {
+                if (document.getElementById(id)) document.getElementById(id).style.display = 'none';
+            });
             return;
         }
 
+        document.getElementById('victory-container').style.display = 'none';
+        document.getElementById('today-briefing').style.display = isToday ? 'block' : 'none';
+        document.getElementById('briefing-content').innerHTML = `
+            <div class="briefing-detail"><strong>Main Session</strong>${data.main}</div>
+            <div class="briefing-detail"><strong>Biomechanical Focus</strong>${data.attention}</div>
+            <div class="briefing-detail"><strong>Core Protocol</strong>${data.details}</div>`;
+
+        // Inject dynamic detailed workout data
+        document.getElementById('main-header-text').innerText = isToday ? "2. Main Workout" : "Exercise Details";
         document.getElementById('main-title').innerText = data.title;
-        document.getElementById('main-summary').innerText = data.summary;
+        document.getElementById('main-desc').innerText = data.desc;
+        document.getElementById('main-protip').innerText = data.protip;
         
-        const tipList = document.getElementById('tip-list');
-        tipList.innerHTML = '';
-        data.tips.forEach(tip => {
+        // Inject Core Routine List
+        document.getElementById('core-title').innerText = data.coreKey === 'None' ? "Recovery Protocol" : `Core Routine ${data.coreKey}`;
+        const coreList = document.getElementById('core-list');
+        coreList.innerHTML = '';
+        CORE_MAP[data.coreKey].forEach(ex => {
             const li = document.createElement('li');
-            li.innerHTML = tip.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            tipList.appendChild(li);
+            li.innerText = ex;
+            coreList.appendChild(li);
         });
+
+        document.getElementById('main-complete-btn').style.display = isToday ? 'block' : 'none';
+
+        ['sec-warmup', 'sec-main', 'sec-core', 'sec-cooldown'].forEach(id => {
+            if (document.getElementById(id)) document.getElementById(id).style.display = isToday ? 'block' : (id === 'sec-main' ? 'block' : 'none');
+        });
+        
+        if (isToday) {
+            document.getElementById('sec-warmup').className = 'section active-section';
+            document.getElementById('sec-main').className = 'section locked';
+            document.getElementById('content-main').style.display = 'none';
+            document.getElementById('sec-core').className = 'section';
+            document.getElementById('sec-cooldown').className = 'section';
+            if (data.coreKey === 'None') document.getElementById('sec-core').style.display = 'none';
+        } else {
+            document.getElementById('sec-main').className = 'section active-section';
+            document.getElementById('content-main').style.display = 'block';
+        }
     },
 
     initPhase(type) {
+        this.requestWakeLock();
+        document.getElementById('strip').style.pointerEvents = 'none';
+        document.getElementById('strip').style.opacity = '0.4';
+        document.getElementById('today-briefing').style.display = 'none';
         this.mode = type;
-        const set = CONFIG[type];
-        this.idx = 0; this.time = set[0].d;
+        
+        const set = this.getSet();
+        this.idx = 0;
+        
         document.getElementById(`${type}-init-btn`).style.display = 'none';
         document.getElementById(`content-${type}`).style.display = 'block';
-        this.updateUI();
-        this.speak(`Starting ${set[0].n}. ${set[0].c}`);
-        this.timer = setInterval(() => this.tick(), 1000);
+        
+        if (type === 'core') {
+            this.updateCoreUI();
+            this.speak(`Ready! First is ${set[0].n}. ${set[0].c}`);
+        } else {
+            this.time = set[0].d;
+            this.totalSess = set.reduce((a, b) => a + b.d, 0);
+            this.sessionRem = this.totalSess;
+            this.updateUI();
+            this.speak(`Ready! First is ${set[0].n}. ${set[0].c}`);
+            this.timer = setInterval(() => this.tick(), 1000);
+        }
     },
 
     tick() {
-        this.time--;
+        this.time--; this.sessionRem--;
+        const set = this.getSet();
+        const curSet = set[this.idx];
+        
+        // Progress Cues for timed sessions
+        if (this.time === Math.floor(curSet.d / 2)) this.speak(`Halfway through ${curSet.n}. Keep it up.`);
+        if (this.time === 5) this.speak("Switching in five seconds.");
+        
         if (this.time < 0) {
             this.idx++;
-            if (this.idx >= CONFIG[this.mode].length) { this.finishPhase(); return; }
-            this.time = CONFIG[this.mode][this.idx].d;
-            this.speak(CONFIG[this.mode][this.idx].c);
+            if (this.idx >= set.length) { this.finishPhase(); return; }
+            this.time = set[this.idx].d;
+            // INSTRUCTIONAL AUDIO CUE FOR EVERY NEW EXERCISE
+            this.speak(`Next is ${set[this.idx].n}. ${set[this.idx].c}`);
         }
         this.updateUI();
     },
 
-    finishPhase() {
-        clearInterval(this.timer); this.timer = null;
-        if (this.mode === 'warmup') {
-            document.getElementById('sec-warmup').style.display = 'none';
-            this.speak("Warm-up done. Time for the main session.");
+    // NEW: Manual advance method for Core Routine
+    nextCore() {
+        const set = this.getSet();
+        this.idx++;
+        if (this.idx >= set.length) { 
+            document.getElementById('core-fill').style.width = '100%';
+            this.finishPhase(); 
+            return; 
+        }
+        this.speak(`Next is ${set[this.idx].n}. ${set[this.idx].c}`);
+        this.updateCoreUI();
+    },
+
+    updateCoreUI() {
+        const set = this.getSet();
+        const cur = set[this.idx];
+        document.getElementById(`core-name`).innerText = cur.n;
+        document.getElementById(`core-pic`).src = cur.i;
+        document.getElementById(`core-reps`).innerText = cur.r;
+        document.getElementById(`core-fill`).style.width = ((this.idx / set.length) * 100) + '%';
+        
+        const btn = document.getElementById('core-action');
+        if (this.idx === set.length - 1) {
+            btn.innerText = "Finish Core Routine";
+            btn.className = "btn-success";
         } else {
-            const logs = this.getLogs(); logs.push(new Date().toDateString());
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(logs));
-            location.reload();
+            btn.innerText = "Next Exercise";
+            btn.className = "btn-main";
+        }
+    },
+
+    finishPhase() {
+        const oldMode = this.mode;
+        if (this.timer) { clearInterval(this.timer); this.timer = null; }
+        
+        if (oldMode === 'warmup') {
+            this.releaseWakeLock();
+            document.getElementById('sec-warmup').style.display = 'none';
+            document.getElementById('sec-main').className = 'section active-section';
+            document.getElementById('content-main').style.display = 'block';
+            this.speak("Warm-up complete.");
+        } else if (oldMode === 'core') {
+            this.releaseWakeLock();
+            document.getElementById('sec-core').style.display = 'none';
+            document.getElementById('sec-cooldown').className = 'section active-section';
+            document.getElementById('cooldown-init-btn').style.display = 'block';
+            this.speak("Core routine complete. Let's move to the cool-down.");
+        } else {
+            this.isComplete = true; this.releaseWakeLock();
+            this.showDay(this.todayIdx);
+            document.getElementById('strip').style.pointerEvents = 'auto';
+            document.getElementById('strip').style.opacity = '1';
+            this.speak("Recovery complete. You are awesome!");
         }
     },
 
     completeMain() {
         document.getElementById('sec-main').style.display = 'none';
-        document.getElementById('sec-cooldown').style.display = 'block';
-        this.speak("Main workout logged. Let's recover.");
+        const data = CONFIG.workouts[this.getDayKey(this.todayIdx)];
+        if (data.coreKey !== 'None') {
+            document.getElementById('sec-core').className = 'section active-section';
+            document.getElementById('core-init-btn').style.display = 'block';
+            this.speak("Workout logged. Let's hit the core routine.");
+        } else {
+            document.getElementById('sec-cooldown').className = 'section active-section';
+            document.getElementById('cooldown-init-btn').style.display = 'block';
+            this.speak("Workout logged. Time for cool-down.");
+        }
     },
 
     updateUI() {
-        const cur = CONFIG[this.mode][this.idx];
+        const set = this.getSet();
+        const cur = set[this.idx];
         document.getElementById(`${this.mode}-name`).innerText = cur.n;
+        document.getElementById(`${this.mode}-pic`).src = cur.i;
         document.getElementById(`${this.mode}-clock`).innerText = (this.time < 10 ? '0' : '') + this.time;
-        document.getElementById(`${this.mode}-fill`).style.width = ((cur.d - this.time) / cur.d * 100) + '%';
+        document.getElementById(`${this.mode}-total-rem`).innerText = this.formatTime(this.sessionRem);
+        document.getElementById(`${this.mode}-next`).innerText = set[this.idx+1] ? set[this.idx+1].n : "Finish";
+        document.getElementById(`${this.mode}-fill`).style.width = ((this.totalSess - this.sessionRem) / this.totalSess * 100) + '%';
     },
 
     toggleTimer() {
-        if (this.timer) { clearInterval(this.timer); this.timer = null; }
-        else { this.timer = setInterval(() => this.tick(), 1000); }
+        if (this.timer) { 
+            clearInterval(this.timer); this.timer = null; this.speak("Paused."); this.releaseWakeLock(); 
+        } else { 
+            this.requestWakeLock(); this.timer = setInterval(() => this.tick(), 1000); this.speak("Resuming."); 
+        }
     },
 
     speak(t) {
         window.speechSynthesis.cancel();
         const ut = new SpeechSynthesisUtterance(t);
-        const v = window.speechSynthesis.getVoices().find(v => v.lang === 'en-SG') || window.speechSynthesis.getVoices()[0];
-        ut.voice = v; ut.rate = 1.1;
+        const v = window.speechSynthesis.getVoices().find(v => v.lang === 'en-SG' && v.name.includes('Mei-Jia')) || 
+                  window.speechSynthesis.getVoices().find(v => v.name.includes('Samantha')) || 
+                  window.speechSynthesis.getVoices()[0];
+        ut.voice = v; ut.pitch = 1.25; ut.rate = 1.1;
         window.speechSynthesis.speak(ut);
-    }
+    },
+
+    skip() {
+        this.sessionRem -= this.time;
+        this.idx++;
+        const set = this.getSet();
+        if (this.idx >= set.length) { this.finishPhase(); return; }
+        this.time = set[this.idx].d;
+        // AUDIO CUE TRIGGERS WHEN SKIPPING
+        this.speak(`Skipping to ${set[this.idx].n}. ${set[this.idx].c}`);
+        this.updateUI();
+    },
+
+    restartRoutine() { this.initPhase(this.mode); }
 };
 
 window.onload = () => APP.init();
