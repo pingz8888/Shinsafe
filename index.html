@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>ShinSafe Elite v17.8</title>
+    <title>ShinSafe Elite v18.0</title>
     <style>
         :root {
             --blue: #0A84FF; --bg: #000; --card: #1C1C1E; --text: #FFF;
@@ -46,7 +46,7 @@
         .visual-box img { max-width: 100%; max-height: 35vh; display: block; object-fit: contain; }
         .visual-box .emoji { font-size: 60px; padding: 40px 0; }
 
-        /* HUD: Ring + Timer */
+        /* HUD */
         .hud-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin: 5px 0 15px 0; }
         .ring-wrapper { position: relative; width: 80px; height: 80px; }
         .ring-svg { transform: rotate(-90deg); width: 80px; height: 80px; }
@@ -124,35 +124,52 @@
                 { s: 0, t: "Done", i: "🏃", isImg: false, c: "Warm up complete. Run light." }
             ],
             B: [
-                { s: 480, t: "Ankle Circles", i: ANKLE_IMG, isImg: true, c: "Rotation B. Start ankle circles." },
-                { s: 390, t: "Heel Walks", i: "🦶", isImg: false, c: "Heel walks. Build the tibialis." },
-                { s: 330, t: "Toe Walks", i: "⬆️", isImg: false, c: "Toe walks. Calf activation." },
-                { s: 270, t: "Leg Swings", i: "🦵", isImg: false, c: "Leg swings. Hip mobility." },
-                { s: 150, t: "Pigeon Stretch", i: "🐦", isImg: false, c: "Pigeon stretch. Deep hip opening." },
-                { s: 0, t: "Done", i: "🏃", isImg: false, c: "Preparation finished. Let's go." }
+                { s: 480, t: "Ankle Circles", i: ANKLE_IMG, isImg: true, c: "Start ankle circles." },
+                { s: 390, t: "Heel Walks", i: "🦶", isImg: false, c: "Build the tibialis." },
+                { s: 330, t: "Toe Walks", i: "⬆️", isImg: false, c: "Calf activation." },
+                { s: 270, t: "Leg Swings", i: "🦵", isImg: false, c: "Hip mobility." },
+                { s: 150, t: "Pigeon Stretch", i: "🐦", isImg: false, c: "Pigeon stretch. Deep opening." },
+                { s: 0, t: "Done", i: "🏃", isImg: false, c: "Preparation finished." }
             ]
         },
         protocols: {
             A: [
                 { p: "Rest", d: "60m", hr: "Z1", i: "Recovery walk." },
-                { p: "6:30/km", d: "15:36", hr: "Z3", i: "2.4km Steady. Focus on 'Silent Landing'." },
-                { p: "Slow Tempo", d: "40m", hr: "Z2", i: "Abs: Deadbugs & Planks." },
+                { p: "6:30/km", d: "15:36", hr: "Z3", i: "2.4km Steady. Silent Landing." },
+                { p: "Tempo", d: "40m", hr: "Z2", i: "Abs: Deadbugs & Planks." },
                 { p: "90 RPM", d: "30m", hr: "Z3", i: "Bike Lvl 5-7. High cadence." },
-                { p: "Rehab Pace", d: "45m", hr: "Z2", i: "Tibialis Raises 3x20." },
+                { p: "Rehab", d: "45m", hr: "Z2", i: "Tibialis Raises 3x20." },
                 { p: "5:45/km", d: "18:00", hr: "Z4", i: "5x400m Intervals." },
                 { p: "Static", d: "60m", hr: "Z1", i: "Calf stretch focus." }
             ],
             B: [
                 { p: "Rest", d: "60m", hr: "Z1", i: "Full rest day." },
-                { p: "6:15/km", d: "15:00", hr: "Z4", i: "2.4km Tempo. Monitor shins." },
+                { p: "6:15/km", d: "15:00", hr: "Z4", i: "2.4km Tempo." },
                 { p: "Iso", d: "45m", hr: "Z2", i: "Hollow holds 3x30s." },
                 { p: "Pyramid", d: "30m", hr: "Z4", i: "Bike: Lvl 4 to 8." },
-                { p: "Plyo Pace", d: "45m", hr: "Z2", i: "Weighted Tibialis 3x15." },
+                { p: "Plyo", d: "45m", hr: "Z2", i: "Weighted Tibialis 3x15." },
                 { p: "6:00/km", d: "20:00", hr: "Z4", i: "4x800m Intervals." },
                 { p: "Static", d: "60m", hr: "Z1", i: "Couch stretch 60s." }
             ]
         }
     };
+
+    /** AUDIO ENGINE **/
+    function playBeep(freq = 660, duration = 0.1) {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+    }
 
     function coach(t) {
         window.speechSynthesis.cancel();
@@ -161,12 +178,13 @@
         window.speechSynthesis.speak(m);
     }
 
-    function updateUI(announce = false) {
+    function updateUI(tick = false) {
         const day = new Date().getDay();
         const drills = DATA.drills[state.rot];
         const idx = drills.findIndex((d, i) => state.timeLeft <= d.s && (i === drills.length - 1 || state.timeLeft > drills[i+1].s));
         const d = drills[idx], nextD = drills[idx + 1];
 
+        // Visual Updates
         document.getElementById('rotLabel').innerText = `Rotation ${state.rot}`;
         document.getElementById('tName').innerText = d.t;
         
@@ -177,17 +195,25 @@
             vBox.innerHTML = `<span class="emoji">${d.i}</span>`;
         }
 
-        if (announce && state.timeLeft === d.s) coach(d.c);
+        // Timer Calculations
+        const drillTimeRemaining = nextD ? state.timeLeft - nextD.s : state.timeLeft;
+        
+        // --- LOGIC: BEEPS AND ANNOUNCEMENTS ---
+        if (tick) {
+            if (state.timeLeft === d.s) coach(d.c);
+            if (drillTimeRemaining <= 5 && drillTimeRemaining > 0) playBeep(880, 0.08); // High pitch countdown
+        }
 
         const totalInDrill = nextD ? d.s - nextD.s : 60;
         const offset = 226 - (226 * ((d.s - state.timeLeft) / totalInDrill));
         document.getElementById('ringFill').style.strokeDashoffset = Math.max(0, offset);
 
         const fmt = (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2, '0')}`;
-        document.getElementById('eDisp').innerText = fmt(Math.max(0, nextD ? state.timeLeft - nextD.s : state.timeLeft));
+        document.getElementById('eDisp').innerText = fmt(Math.max(0, drillTimeRemaining));
         document.getElementById('totalDisp').innerText = fmt(Math.max(0, state.timeLeft));
         document.getElementById('nextTask').innerHTML = nextD ? `NEXT: <b>${nextD.t}</b>` : `<b>SESSION COMPLETE</b>`;
 
+        // Protocol & Schedule
         const p = DATA.protocols[state.rot][day];
         document.getElementById('pContent').innerHTML = `
             <div class="p-row"><span>PACE</span><b>${p.p}</b></div>
@@ -214,8 +240,13 @@
             state.isRunning = true;
             document.getElementById('tBtn').innerText = 'PAUSE';
             document.getElementById('tStatus').innerText = "WORKING";
-            if (state.timeLeft === 480) coach(DATA.drills[state.rot][0].c);
-            else coach("Resuming.");
+            
+            // --- LOGIC: INITIAL START ANNOUNCEMENT ---
+            if (state.timeLeft === 480) {
+                coach("Warm up exercise is starting. " + DATA.drills[state.rot][0].c);
+            } else {
+                coach("Resuming.");
+            }
             
             if ('wakeLock' in navigator) state.wakeLock = await navigator.wakeLock.request('screen').catch(()=>{});
             
@@ -225,7 +256,7 @@
                 if (state.timeLeft <= 0) { 
                     clearInterval(state.interval); 
                     state.isRunning = false;
-                    coach("Session complete. Excellent work."); 
+                    coach("Session complete. Great work."); 
                 }
             }, 1000);
         }
