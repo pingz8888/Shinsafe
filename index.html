@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Shin-Safe v10.3</title>
+    <title>Shin-Safe v10.2</title>
     <style>
         :root { --bg: #000; --card: #1c1c1e; --accent: #0a84ff; --highlight: #32d74b; --victory: #ffd700; --text: #fff; --dim: #8e8e93; --border: #2c2c2e; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 16px 40px; -webkit-user-select: none; }
@@ -53,7 +53,6 @@
         .btn-success { background: var(--highlight); color: #000; }
         .next-btn { font-size: 0.8rem; color: var(--dim); text-transform: uppercase; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #3a3a3c; text-align: center; }
         .restart-link { display: block; text-align: center; margin-top: 12px; font-size: 11px; color: var(--dim); text-decoration: underline; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -81,7 +80,7 @@
             <div class="progress-bar"><div id="warmup-fill" class="fill"></div></div>
             <div class="next-btn" onclick="APP.skip()">Next Up: <span id="warmup-next" style="color:#fff;"></span></div>
             <button id="warmup-action" class="btn-main" onclick="APP.toggleTimer()">Pause</button>
-            <a href="#" class="restart-link" id="warmup-restart" onclick="APP.restartRoutine()">Restart Warm-Up</a>
+            <a href="#" class="restart-link" onclick="APP.restartRoutine()">Restart Warm-Up</a>
         </div>
     </div>
 
@@ -112,7 +111,7 @@
             <div class="total-rem">Manual Pace: Focus on perfect form</div>
             <div class="progress-bar"><div id="core-fill" class="fill" style="width:0%"></div></div>
             <button id="core-action" class="btn-main" onclick="APP.nextCore()">Next Exercise</button>
-            <a href="#" class="restart-link" id="core-restart" onclick="APP.restartRoutine()">Restart Core</a>
+            <a href="#" class="restart-link" onclick="APP.restartRoutine()">Restart Core</a>
         </div>
     </div>
 
@@ -127,7 +126,7 @@
             <div class="progress-bar"><div id="cooldown-fill" class="fill"></div></div>
             <div class="next-btn" onclick="APP.skip()">Next Up: <span id="cooldown-next" style="color:#fff;"></span></div>
             <button id="cooldown-action" class="btn-main" onclick="APP.toggleTimer()">Pause</button>
-            <a href="#" class="restart-link" id="cooldown-restart" onclick="APP.restartRoutine()">Restart Cool-Down</a>
+            <a href="#" class="restart-link" onclick="APP.restartRoutine()">Restart Cool-Down</a>
         </div>
     </div>
 </div>
@@ -145,110 +144,91 @@ const CONFIG = {
     workouts: {
         'Monday': { 
             title: "Base Aerobic Run (3km)", main: "3km Run (6:00-6:30 pace).", attention: "High cadence, mid-foot strike.", coreKey: "A", 
-            details: "Core Routine A: Trunk stability and glute engagement. Planks, Dead Bugs, and Glute Bridges.",
-            desc: "Maintain a steady conversational pace. The goal is to build structural tolerance.",
+            details: "Core Routine A: Focuses on isometric trunk stability and glute engagement. Exercises: Forearm Planks, Dead Bugs, and Glute Bridges.",
+            desc: "Maintain a steady conversational pace. The goal is to build structural tolerance in your shins.",
             protip: "Aim for a cadence of 170+ steps per minute."
         },
         'Tuesday': { 
             title: "Steady Cycling (40m)", main: "40m (80-90 RPM). Zone 2.", attention: "Focus on upward pedal 'pull'.", coreKey: "C", 
-            details: "Core Routine C: Deep abdominal compression and spinal balance. Hollow Holds, Russian Twists, and Superman Holds.",
-            desc: "Low-impact recovery. flush metabolic waste.",
+            details: "Core Routine C: Emphasizes deep abdominal compression and spinal balance. Exercises: Hollow Holds, Russian Twists, and Superman Holds.",
+            desc: "Low-impact active recovery. Keep resistance moderate but cadence high.",
             protip: "Focus on the 'up-pull' of the pedal stroke."
         },
         'Wednesday': { 
             title: "Speed Intervals (4x400m)", main: "4x400m at 5:15 pace. 90s walk rest.", attention: "Do not jog during rest.", coreKey: "B", 
-            details: "Core Routine B: Lateral stability and anti-rotation control. Side Planks, Bicycle Crunches, and Bird Dogs.",
-            desc: "High-intensity biomechanical test.",
+            details: "Core Routine B: Concentrates on lateral stability and anti-rotation control. Exercises: Side Planks, Bicycle Crunches, and Bird Dogs.",
+            desc: "High-intensity biomechanical test. Run each 400m strong.",
             protip: "Lean forward slightly from the ankles, not the waist."
         },
         'Thursday': { 
             title: "Elliptical Resistance", main: "35 Minutes moderate resistance.", attention: "Heels glued to pedals.", coreKey: "C", 
-            details: "Core Routine C: Targets abdominal bracing and lower back resilience. Hollow Holds, Russian Twists, and Superman Holds.",
-            desc: "Zero-impact endurance session mimicking running motion.",
+            details: "Core Routine C: Targets abdominal bracing and lower back resilience to balance the core. Exercises: Hollow Holds, Russian Twists, and Superman Holds.",
+            desc: "Zero-impact endurance session that mimics the running motion.",
             protip: "Keep your heels glued to the pedals."
         },
         'Friday': { 
             title: "Endurance Progression", main: "4km total. Final 1km build to 5:45.", attention: "Stay light on feet.", coreKey: "A", 
-            details: "Core Routine A: Structural trunk stability and pelvic levelness. Forearm Planks, Dead Bugs, and Glute Bridges.",
-            desc: "Start slow and build to a strong finish.",
+            details: "Core Routine A: Structural trunk stability and pelvic levelness to maintain form under fatigue. Exercises: Forearm Planks, Dead Bugs, and Glute Bridges.",
+            desc: "Start slow and gradually 'turn up the dial' to finish strong.",
             protip: "Shorten your stride if you feel any shin fatigue."
         },
         'Saturday': { 
             title: "Active Recovery", main: "45m brisk walk or 30m mobility/Yoga.", attention: "Zero intensity focus.", coreKey: "None", 
-            details: "Mobility Protocol: restorative movements like Ankle Circles and Cat-Cow.",
-            desc: "CNS reset day. Pure blood flow.",
+            details: "Mobility Protocol: restorative movements including Ankle Circles and Cat-Cow to aid joint health and blood flow.",
+            desc: "Purely for blood flow. CNS reset day.",
             protip: "Enjoy the movement and breathe deep."
         },
         'Sunday': { 
             title: "Full System Rest", main: "Rest Day. Zero Impact.", attention: "15m static stretch focusing on soleus.", coreKey: "None", 
-            details: "Stretching & Restoration: Dedicated static holds to reset tissue elasticity.",
+            details: "Stretching & Restoration: Dedicated static holds for the calves and hip flexors to reset tissue elasticity for the upcoming week.",
             desc: "Complete rest for tissue repair.",
             protip: "Hydrate heavily and get 8+ hours of sleep."
         }
     },
     warmup: [
-        { n: "Ankle Circles", d: 60, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Thirty seconds each way. Lubricate the joints." },
-        { n: "Heel Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Rock back onto heels. Pull toes up high." },
-        { n: "Toe Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Push up high onto balls of feet. Core tight." },
-        { n: "Leg Swings", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Swing leg smoothly forward and backward." },
-        { n: "High Knee March", d: 180, i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Brace core. Drive knees up to hip height." }
+        { n: "Ankle Circles", d: 60, i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Lift one foot and slowly rotate your ankle in big, wide circles." },
+        { n: "Heel Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Rock back onto your heels. Keep your legs straight and pull your toes up." },
+        { n: "Toe Walks", d: 120, i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Push up high onto the balls of your feet. Keep your core tight." },
+        { n: "Leg Swings", d: 120, i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Use a wall for balance. Swing your leg smoothly forward and backward." },
+        { n: "High Knee March", d: 180, i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Stand tall and drive your knees up to hip height." }
     ],
     coreA: [
-        { n: "Forearm Plank", r: "3 x 45s", i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Back flat. Brace core tight." },
-        { n: "Dead Bug", r: "3 x 10/side", i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Lower opposite limb. Back hard into floor." },
-        { n: "Glute Bridge", r: "3 x 15 reps", i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Squeeze glutes. Push hips up." }
+        { n: "Forearm Plank", r: "3 x 45s", i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Forearm plank. Keep your back completely flat." },
+        { n: "Dead Bug", r: "3 x 10/side", i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Dead bug. Press your lower back hard into the floor." },
+        { n: "Glute Bridge", r: "3 x 15 reps", i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Glute bridge. Squeeze your glutes at the top." }
     ],
     coreB: [
-        { n: "Side Plank Left", r: "3 x 30s", i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Lift hips high. Hold steady." },
-        { n: "Side Plank Right", r: "3 x 30s", i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Switch sides. Body in a straight line." },
-        { n: "Bicycle Crunches", r: "3 x 20 reps", i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Twist from core. Elbow to opposite knee." },
-        { n: "Bird Dog", r: "3 x 10/side", i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Extend opposite arm/leg. Spine neutral." }
+        { n: "Side Plank Left", r: "3 x 30s", i: "https://i.ibb.co/7NTB64jM/IMG-5506.jpg", c: "Side plank on your left arm." },
+        { n: "Side Plank Right", r: "3 x 30s", i: "https://i.ibb.co/hR5g1RZ2/IMG-5502.png", c: "Switch sides. Side plank on your right arm." },
+        { n: "Bicycle Crunches", r: "3 x 20 reps", i: "https://i.ibb.co/Zzv6DF7d/IMG-5503.png", c: "Bicycle crunches. Twist from your core." },
+        { n: "Bird Dog", r: "3 x 10/side", i: "https://i.ibb.co/XrrxM3WK/IMG-5506.jpg", c: "Bird dog. Keep your spine neutral." }
     ],
     coreC: [
-        { n: "Hollow Hold", r: "3 x 30s", i: "https://i.ibb.co/B5RMc6f9/IMG-5518.png", c: "Legs and shoulders up. Lower back flat. Breathe!" },
-        { n: "Russian Twists", r: "3 x 20 reps", i: "https://i.ibb.co/nNq7nj68/IMG-5519.png", c: "Lean back. Rotate heavily from core." },
-        { n: "Superman Holds", r: "3 x 15 reps", i: "https://i.ibb.co/ycGnQkn9/IMG-5520.png", c: "Lift arms and legs simultaneously." }
+        { n: "Hollow Hold", r: "3 x 30s", i: "https://i.ibb.co/B5RMc6f9/IMG-5518.png", c: "Hollow hold. Lower back flat against the floor. Breathe!" },
+        { n: "Russian Twists", r: "3 x 20 reps", i: "https://i.ibb.co/nNq7nj68/IMG-5519.png", c: "Russian twists. Rotate heavily from your core." },
+        { n: "Superman Holds", r: "3 x 15 reps", i: "https://i.ibb.co/ycGnQkn9/IMG-5520.png", c: "Superman holds. Lift your arms and legs simultaneously." }
     ],
     cooldown: [
-        { n: "Straight Calf Stretch", d: 120, i: "https://i.ibb.co/spW9gpLY/IMG-5521.png", c: "Heel down, lean in. Stretch the upper calf." },
-        { n: "Bent Knee Stretch", d: 120, i: "https://i.ibb.co/d0dXZn5S/IMG-5522.png", c: "Bend back knee. Keep heel glued down." },
-        { n: "Hip Flexor Stretch", d: 120, i: "https://i.ibb.co/RKN9sZT/IMG-5523.png", c: "Tuck pelvis. Lean forward." },
-        { n: "Seated Hamstring", d: 180, i: "https://i.ibb.co/R4hLfMy9/IMG-5524.png", c: "Reach gently forward. Breathe into it." },
-        { n: "Cobra Stretch", d: 120, i: "https://i.ibb.co/XxhShMNF/IMG-5525.png", c: "Press chest up. Stretch that core." }
+        { n: "Straight Calf Stretch", d: 120, i: "https://i.ibb.co/spW9gpLY/IMG-5521.png", c: "Heel down, lean in. Stretch your upper calf." },
+        { n: "Bent Knee Stretch", d: 120, i: "https://i.ibb.co/d0dXZn5S/IMG-5522.png", c: "In that same stance, slightly bend your back knee." },
+        { n: "Hip Flexor Stretch", d: 120, i: "https://i.ibb.co/RKN9sZT/IMG-5523.png", c: "Tuck pelvis and lean in. Open those hips up." },
+        { n: "Seated Hamstring", d: 180, i: "https://i.ibb.co/R4hLfMy9/IMG-5524.png", c: "Reach forward gently. Breathe into it." },
+        { n: "Cobra Stretch", d: 120, i: "https://i.ibb.co/XxhShMNF/IMG-5525.png", c: "Look up and stretch that core. Great work." }
     ]
 };
 
 const APP = {
     timer: null, mode: null, idx: 0, time: 0, sessionRem: 0, totalSess: 0,
     todayIdx: new Date().getDay(), currentDayIdx: new Date().getDay(),
-    completedDays: [], wakeLock: null,
+    isComplete: false, wakeLock: null,
 
     init() {
-        this.initPersistence();
         this.renderWeek();
         this.showDay(this.todayIdx);
         window.speechSynthesis.getVoices();
         document.addEventListener('visibilitychange', () => {
             if (this.wakeLock !== null && document.visibilityState === 'visible') this.requestWakeLock();
         });
-    },
-
-    getWeekID() {
-        const today = new Date();
-        const diff = today.getDate() - today.getDay();
-        const lastSunday = new Date(today.setDate(diff));
-        lastSunday.setHours(0,0,0,0);
-        return lastSunday.getTime();
-    },
-
-    initPersistence() {
-        const currentWeek = this.getWeekID();
-        const storedWeek = localStorage.getItem('shinSafe_weekId');
-        if (storedWeek != currentWeek) {
-            localStorage.setItem('shinSafe_weekId', currentWeek);
-            localStorage.setItem('shinSafe_completedDays', JSON.stringify([]));
-        }
-        this.completedDays = JSON.parse(localStorage.getItem('shinSafe_completedDays') || "[]");
     },
 
     async requestWakeLock() {
@@ -265,7 +245,9 @@ const APP = {
     },
 
     getDayKey(index) {
-        return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][index];
+        const d = CONFIG.days[index];
+        const map = {'Sun':'Sunday','Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday'};
+        return map[d];
     },
 
     getSet() {
@@ -279,8 +261,8 @@ const APP = {
     renderWeek() {
         const strip = document.getElementById('strip');
         strip.innerHTML = '';
-        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((d, i) => {
-            const isDone = this.completedDays.includes(i);
+        CONFIG.days.forEach((d, i) => {
+            const isDone = (i === this.todayIdx && this.isComplete);
             const el = document.createElement('div');
             el.className = `day ${i === this.currentDayIdx ? 'active' : ''} ${isDone ? 'done' : ''}`;
             el.onclick = () => this.showDay(i);
@@ -292,29 +274,21 @@ const APP = {
     showDay(i) {
         this.currentDayIdx = i;
         this.renderWeek();
-        const isCompleted = this.completedDays.includes(i);
         const isToday = (i === this.todayIdx);
         const dayKey = this.getDayKey(i);
         const data = CONFIG.workouts[dayKey];
 
-        const victoryContainer = document.getElementById('victory-container');
-        const briefingCard = document.getElementById('today-briefing');
-        const sections = ['sec-warmup', 'sec-main', 'sec-core', 'sec-cooldown'];
-
-        // VICTORY LOCKDOWN: If completed, hide cards and only show victory banner
-        if (isCompleted) {
-            victoryContainer.style.display = 'block';
-            briefingCard.style.display = 'none';
-            sections.forEach(id => {
+        if (isToday && this.isComplete) {
+            document.getElementById('victory-container').style.display = 'block';
+            ['sec-warmup', 'sec-main', 'sec-core', 'sec-cooldown', 'today-briefing'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = 'none';
             });
             return;
         }
 
-        // Standard Layout
-        victoryContainer.style.display = 'none';
-        briefingCard.style.display = 'block';
+        document.getElementById('victory-container').style.display = 'none';
+        document.getElementById('today-briefing').style.display = isToday ? 'block' : 'none';
         
         document.getElementById('briefing-content').innerHTML = `
             <div class="briefing-detail"><strong>Main Session</strong>${data.main}</div>
@@ -330,12 +304,14 @@ const APP = {
         const coreList = document.getElementById('core-list');
         coreList.innerHTML = '';
         CORE_MAP[data.coreKey].forEach(ex => {
-            const li = document.createElement('li'); li.innerText = ex; coreList.appendChild(li);
+            const li = document.createElement('li');
+            li.innerText = ex;
+            coreList.appendChild(li);
         });
 
         document.getElementById('main-complete-btn').style.display = isToday ? 'block' : 'none';
 
-        sections.forEach(id => {
+        ['sec-warmup', 'sec-main', 'sec-core', 'sec-cooldown'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = isToday ? 'block' : (id === 'sec-main' ? 'block' : 'none');
         });
@@ -344,6 +320,8 @@ const APP = {
             document.getElementById('sec-warmup').className = 'section active-section';
             document.getElementById('sec-main').className = 'section locked';
             document.getElementById('content-main').style.display = 'none';
+            document.getElementById('sec-core').className = 'section';
+            document.getElementById('sec-cooldown').className = 'section';
             if (data.coreKey === 'None') document.getElementById('sec-core').style.display = 'none';
         } else {
             document.getElementById('sec-main').className = 'section active-section';
@@ -357,12 +335,16 @@ const APP = {
         document.getElementById('strip').style.opacity = '0.4';
         document.getElementById('today-briefing').style.display = 'none';
         this.mode = type;
+        
         const set = this.getSet();
         this.idx = 0;
+        
         document.getElementById(`${type}-init-btn`).style.display = 'none';
         document.getElementById(`content-${type}`).style.display = 'block';
+        
         if (type === 'core') {
-            this.updateCoreUI(); this.speak(`Ready! First is ${set[0].n}. ${set[0].c}`);
+            this.updateCoreUI();
+            this.speak(`Ready! First is ${set[0].n}. ${set[0].c}`);
         } else {
             this.time = set[0].d;
             this.totalSess = set.reduce((a, b) => a + b.d, 0);
@@ -377,8 +359,10 @@ const APP = {
         this.time--; this.sessionRem--;
         const set = this.getSet();
         const curSet = set[this.idx];
-        if (this.time === Math.floor(curSet.d / 2)) this.speak(`Halfway through ${curSet.n}.`);
+        
+        if (this.time === Math.floor(curSet.d / 2)) this.speak(`Halfway through ${curSet.n}. Keep it up.`);
         if (this.time === 5) this.speak("Switching in five seconds.");
+        
         if (this.time < 0) {
             this.idx++;
             if (this.idx >= set.length) { this.finishPhase(); return; }
@@ -392,7 +376,9 @@ const APP = {
         const set = this.getSet();
         this.idx++;
         if (this.idx >= set.length) { 
-            document.getElementById('core-fill').style.width = '100%'; this.finishPhase(); return; 
+            document.getElementById('core-fill').style.width = '100%';
+            this.finishPhase(); 
+            return; 
         }
         this.speak(`Next is ${set[this.idx].n}. ${set[this.idx].c}`);
         this.updateCoreUI();
@@ -405,33 +391,36 @@ const APP = {
         document.getElementById(`core-pic`).src = cur.i;
         document.getElementById(`core-reps`).innerText = cur.r;
         document.getElementById(`core-fill`).style.width = ((this.idx / set.length) * 100) + '%';
+        
         const btn = document.getElementById('core-action');
         if (this.idx === set.length - 1) {
-            btn.innerText = "Finish Core Routine"; btn.className = "btn-success";
+            btn.innerText = "Finish Core Routine";
+            btn.className = "btn-success";
         } else {
-            btn.innerText = "Next Exercise"; btn.className = "btn-main";
+            btn.innerText = "Next Exercise";
+            btn.className = "btn-main";
         }
     },
 
     finishPhase() {
         const oldMode = this.mode;
         if (this.timer) { clearInterval(this.timer); this.timer = null; }
+        
         if (oldMode === 'warmup') {
-            this.releaseWakeLock(); document.getElementById('sec-warmup').style.display = 'none';
+            this.releaseWakeLock();
+            document.getElementById('sec-warmup').style.display = 'none';
             document.getElementById('sec-main').className = 'section active-section';
             document.getElementById('content-main').style.display = 'block';
             this.speak("Warm-up complete.");
         } else if (oldMode === 'core') {
-            this.releaseWakeLock(); document.getElementById('sec-core').style.display = 'none';
+            this.releaseWakeLock();
+            document.getElementById('sec-core').style.display = 'none';
             document.getElementById('sec-cooldown').className = 'section active-section';
             document.getElementById('cooldown-init-btn').style.display = 'block';
-            this.speak("Core routine complete.");
+            this.speak("Core routine complete. Let's move to the cool-down.");
         } else {
-            if (!this.completedDays.includes(this.todayIdx)) {
-                this.completedDays.push(this.todayIdx);
-                localStorage.setItem('shinSafe_completedDays', JSON.stringify(this.completedDays));
-            }
-            this.releaseWakeLock(); this.showDay(this.todayIdx);
+            this.isComplete = true; this.releaseWakeLock();
+            this.showDay(this.todayIdx);
             document.getElementById('strip').style.pointerEvents = 'auto';
             document.getElementById('strip').style.opacity = '1';
             this.speak("Recovery complete. You are awesome!");
@@ -444,16 +433,17 @@ const APP = {
         if (data.coreKey !== 'None') {
             document.getElementById('sec-core').className = 'section active-section';
             document.getElementById('core-init-btn').style.display = 'block';
-            this.speak("Workout logged.");
+            this.speak("Workout logged. Let's hit the core routine.");
         } else {
             document.getElementById('sec-cooldown').className = 'section active-section';
             document.getElementById('cooldown-init-btn').style.display = 'block';
-            this.speak("Workout logged.");
+            this.speak("Workout logged. Time for cool-down.");
         }
     },
 
     updateUI() {
-        const set = this.getSet(); const cur = set[this.idx];
+        const set = this.getSet();
+        const cur = set[this.idx];
         document.getElementById(`${this.mode}-name`).innerText = cur.n;
         document.getElementById(`${this.mode}-pic`).src = cur.i;
         document.getElementById(`${this.mode}-clock`).innerText = (this.time < 10 ? '0' : '') + this.time;
@@ -481,13 +471,18 @@ const APP = {
     },
 
     skip() {
-        this.sessionRem -= this.time; this.idx++; const set = this.getSet();
+        this.sessionRem -= this.time;
+        this.idx++;
+        const set = this.getSet();
         if (this.idx >= set.length) { this.finishPhase(); return; }
-        this.time = set[this.idx].d; this.speak(`Moving to ${set[this.idx].n}.`); this.updateUI();
+        this.time = set[this.idx].d;
+        this.speak(`Skipping to ${set[this.idx].n}. ${set[this.idx].c}`);
+        this.updateUI();
     },
 
     restartRoutine() { this.initPhase(this.mode); }
 };
+
 window.onload = () => APP.init();
 </script>
 </body>
